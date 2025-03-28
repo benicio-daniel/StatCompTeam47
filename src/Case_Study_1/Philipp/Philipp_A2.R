@@ -42,11 +42,9 @@ rho_n_log <- function(n) {
   # \log(\Gamma(n) \approx \log(\sqrt{2\pi} \, n^{n - \frac{1}{2}} e^{-n}) as n -> inf (because lower values are computed)
   denominator <- lgamma(1 / 2) + lgamma((n - 2) / 2)
   result <- exp(numerator - denominator)
-  
-  print(result)
   return(result)
 }
-rho_n_log(2000)
+print(rho_n_log(2000))
 
 
 #d)
@@ -59,10 +57,10 @@ rho_vals <- sapply(n_vals, function(n) rho_n_log(n) / sqrt(n))
 df <- data.frame(n = n_vals, rho_over_sqrt_n = rho_vals)
 
 # Plot with ggplot2
-options(vsc.plot = TRUE)
-ggplot(df, aes(x = n, y = rho_over_sqrt_n)) +
-  geom_line(color = "steelblue") +
-  labs(title = expression(frac(rho[n], sqrt(n))~"vs. n"),
-       x = "n",
-       y = expression(frac(rho[n], sqrt(n)))) +
-  theme_minimal()
+plot <- ggplot(df, aes(x = n, y = rho_over_sqrt_n)) +
+  geom_line(color = "red") +
+  scale_x_log10() +
+  labs(x = "n",
+       y = expression(frac(rho[n], sqrt(n))))
+
+print(plot)
