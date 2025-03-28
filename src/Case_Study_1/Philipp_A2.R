@@ -1,4 +1,6 @@
 # Aufgabe 2
+library(ggplot2)
+
 #a)
 rho_n <- function(n) {
     if (n < 2) {
@@ -17,10 +19,12 @@ rho_n <- function(n) {
   return(result)
 }
 
+
 #b)
 rho_n(2000)
 print(gamma(2000))
 # as seen in the line the gamma function returns inf for n = 2000 so inf/inf = NaN
+
 
 #c)
 rho_n_log <- function(n) {
@@ -44,29 +48,21 @@ rho_n_log <- function(n) {
 }
 rho_n_log(2000)
 
-#d)
-library(ggplot2)
 
-# Stable implementation of ρ_n
-rho_n <- function(n) {
-  log_rho <- lgamma((n - 1) / 2) - (lgamma(0.5) + lgamma((n - 2) / 2))
-  return(exp(log_rho))
-}
+#d)
 
 # Compute rho_n / sqrt(n) for values of n
-n_vals <- 3:2000
-rho_vals <- sapply(n_vals, function(n) rho_n(n) / sqrt(n))
+n_vals <- 3:2000 #because rho_n_log is undefined for n < 2
+rho_vals <- sapply(n_vals, function(n) rho_n_log(n) / sqrt(n))
 
 # Create data frame for plotting
 df <- data.frame(n = n_vals, rho_over_sqrt_n = rho_vals)
 
 # Plot with ggplot2
+options(vsc.plot = TRUE)
 ggplot(df, aes(x = n, y = rho_over_sqrt_n)) +
   geom_line(color = "steelblue") +
   labs(title = expression(frac(rho[n], sqrt(n))~"vs. n"),
        x = "n",
        y = expression(frac(rho[n], sqrt(n)))) +
   theme_minimal()
-
-
-# Aufgabe 4
