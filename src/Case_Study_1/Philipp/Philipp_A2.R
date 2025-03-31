@@ -37,14 +37,15 @@ rho_n_log <- function(n) {
     }
 
   numerator <- lgamma((n - 1) / 2) 
-  # this the same as log(gamma(n)) but it is using the stirling approximation for n! and using the log gamma function in this approximation, not after the calculation:
-  # so this: \log(\Gamma(n)) \approx \left(n - \frac{1}{2}\right)\log(n) - n + \frac{1}{2}\log(2\pi) isn't going in it's steps so fast to inf as.:
-  # \log(\Gamma(n) \approx \log(\sqrt{2\pi} \, n^{n - \frac{1}{2}} e^{-n}) as n -> inf (because lower values are computed)
   denominator <- lgamma(1 / 2) + lgamma((n - 2) / 2)
   result <- exp(numerator - denominator)
   return(result)
 }
 print(rho_n_log(2000))
+
+# this the same as log(gamma(n)) but it is using the stirling approximation for n! and using the log gamma function in this approximation, not after the calculation:
+  # so this: $\log(\Gamma(n)) \approx \left(n - \frac{1}{2}\right)\log(n) - n + \frac{1}{2}\log(2\pi)$ isn't going in it's steps so fast to inf as.:
+  # $\log(\Gamma(n) \approx \log(\sqrt{2\pi} \, n^{n - \frac{1}{2}} e^{-n})$ as n -> inf (because lower values are computed)
 
 
 #d)
@@ -64,3 +65,5 @@ plot <- ggplot(df, aes(x = n, y = rho_over_sqrt_n)) +
        y = expression(frac(rho[n], sqrt(n))))
 
 print(plot)
+
+# Interpretation:
