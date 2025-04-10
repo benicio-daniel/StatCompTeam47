@@ -1,0 +1,74 @@
+---
+title: "Case Study 1"
+subtitle: "AKSTA Statistical Computing"
+output: 
+#pdf_document
+  unilur::examen_pdf_solution: default
+  #unilur::examen_pdf: default
+  keep_tex: true
+---
+
+*The  .Rmd and .html (alternatively the .pdf) should be uploaded in TUWEL by the deadline. Refrain from using explanatory comments in the R code chunks but write them as text instead. Points will be deducted if the submitted file is not in a decent form.*
+
+# 5. Readable and efficient code
+
+Read over the code below. 
+
+## a. 
+Explain (in text) what the code does.
+```{r}
+set.seed(1)
+x <- rnorm(100)
+z <- rnorm(100)
+
+```
+this block creates two normal distributions
+```{r}
+fit <- lm(x ~ z)
+r <- fit$residuals
+x <- sin(r) + .01
+if (sum(x >= .002) < 2) {
+  stop("step 2 requires 2 observation(s) with value >= .002")
+}
+```
+we are fitting linear models according and Updates x with a sinusoidal transformation of the residuals, scaled and shifted:
+```{r}
+set.seed(1)
+x <- rnorm(1000)
+y <- 2 + x + rnorm(1000)
+df <- data.frame(x, y)
+```
+we create a data frame with normal distributed data frame
+```{r}
+cat("Step", 1, "\n")
+fit1 <- lm(y ~ x, data = df[-(1:250),])
+p1 <- predict(fit1, newdata = df[(1:250),])
+r <- sqrt(mean((p1 - df[(1:250),"y"])^2))
+```
+we then again fit a model on a chunk of data, predict on the excluded chunk,and compute the sqare root of error
+
+## b.
+Explain (in text) what you would change to make the code more readable.
+
+
+-Comment, what the intent of the code is
+- also write it in functions to have minimal repeated code nd everything is named
+-Then you would have to name variables to make it more understandable and be more understandable what these numbers are and
+## c.
+Change the code according to b. and wrap it in a function. This function should have at most 10 lines (without adding commands to more lines such as `x <- 1; y <- 2`. Such commands will count as 2 lines!). Check that the function called on the same input outputs the same as the provided code.
+
+```{r}
+model_step_analysis <- function(data, x_vec, z_vec, scalar, constant, interval_idx, step_n) {
+  fit <- lm(x_vec ~ z_vec)
+  residuals <- fit$residuals
+  x_new <- scalar * sin(residuals) + constant
+  if (sum(x_new >= (constant + 0.01)) < (scalar + 1)) {
+    stop(paste("step", scalar + 1, "requires", scalar + 1,
+               "observation(s) with value >=", (constant + 0.01)))
+  }
+  cat("Step", step_n, "\n")
+  model <- lm(y ~ x, data = data[-interval_idx, ])
+  preds <- predict(model, newdata = data[interval_idx, ])
+  sqrt(mean((preds - data[interval_idx, "y"])^2))
+}
+```

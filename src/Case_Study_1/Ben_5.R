@@ -2,7 +2,7 @@
 set.seed(1)
 x <- rnorm(100)
 z <- rnorm(100)
-#thsi block creates two normal distributions
+#this block creates two normal distributions
 fit <- lm(x ~ z)
 r <- fit$residuals
 x <- sin(r) + .01
@@ -21,7 +21,7 @@ cat("Step", 1, "\n")
 fit1 <- lm(y ~ x, data = df[-(1:250),])
 p1 <- predict(fit1, newdata = df[(1:250),])
 r <- sqrt(mean((p1 - df[(1:250),"y"])^2))
-# we then again fit a model on a chunk of data, predict on the excluded chunk,and comute the sqare root of error
+# we then again fit a model on a chunk of data, predict on the excluded chunk,and compute the sqare root of error
 
 #Aufgabe 5b
 #Comment, what the intent of the code is

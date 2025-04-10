@@ -1,5 +1,24 @@
-#Aufgabe 3a
+---
+title: "Case Study 1"
+subtitle: "AKSTA Statistical Computing"
+output: 
+#pdf_document
+  unilur::examen_pdf_solution: default
+  #unilur::examen_pdf: default
+  keep_tex: true
+---
 
+*The  .Rmd and .html (alternatively the .pdf) should be uploaded in TUWEL by the deadline. Refrain from using explanatory comments in the R code chunks but write them as text instead. Points will be deducted if the submitted file is not in a decent form.*
+
+## a. 
+
+
+- In R, simulate rolling a fair 6-sided die $n=10\,000$ times using vectorized functions. 
+- After each roll, compute the cumulative mean of all previous rolls. 
+
+- Plot the running average against the number of rolls and comment on the result.
+
+```{r}
 #dicerolling fucntion
 dice_experiment <- function(number_of_times) {
   cumsum(sample(1:6, number_of_times, replace = TRUE)) / 1:number_of_times
@@ -30,14 +49,25 @@ abline(h = 3.5, col = "red", lty = 2)
 # Close device
 dev.off()
 
-#3b
+```
+
+
+## b. 
+- Replicate the die-rolling experiment 
+ $M=50$ times using a for loop. 
+This will result in $50$
+paths which you can plot against the number of rolls.
+```{r}
 dice_list <- vector(mode = "list", length = 50)
 for (i in 1:50){
   dice_list[[i]] <- dice_experiment(n)
 }
 # Convert list to matrix
 dice_matrix <- do.call(cbind, dice_list)
+```
 
+- Plot all 50 paths on the same graph to observe the variation in the running averages.
+```{r}
 # Plot all 50 lines
 file_path <- file.path("plots", "50xdice_running_average.png")
 
@@ -48,7 +78,30 @@ matplot(1:n, dice_matrix, type = "l", lty = 1, col = rgb(0, 0, 1, 0.3),
 abline(h = 3.5, col = "red", lty = 2)
 dev.off()
 
-#Aufgabe 3e
+```
+
+
+
+
+## c.
+What is the theoretical expected value of a fair 6-sided die?
+
+Anwser: It seems to converge around 3.5, because the sum of the sides is 21 divided by 6 sides.
+
+## d. 
+Comment on how the running mean of the paths behaves relative to the expected value  as $n$ increases.
+
+Anwser: In the beginning it diverges greatly from the expected mean and with increases of rolls it converges to 3.5
+
+## e. 
+
+- Modify the code in b. to use a while loop.
+
+- Stop the loop when the proportion of replications where the difference between the running average and the expected value lies outside the interval 
+$[-\epsilon,\epsilon]$ is less than 0.05. Use $\epsilon = 0.01$. 
+
+- How high is $n$ at  the end of the loop?
+```{r}
 epsilon <- 0.01
 threshold <- 0.05
 num_simulations <- 50
@@ -77,9 +130,22 @@ if (roll_index > n) {
 } else {
   print(paste("First roll index where proportion_outside <", threshold, ":", roll_index))
 }
+```
 
 
-# Aufgabe 3f
+
+- $n$ is converges around 80141 to 143530, depending on the case
+## f. 
+
+- Repeat the analysis in b, but instead of simulating from a 
+discrete uniform distribution, simulate from a continuous standard cauchy distribution using `rcauchy()`. The (standard) cauchy distribution arises from  the ratio of two independent 
+mean zero (standard) normally distributed random variables.
+
+- Plot the running mean against increasing 
+$n$. Comment on whether the weak Law of Large Numbers seems to hold for this distribution.
+Explain why or why not.
+
+```{r}
 cauchy_experiment <- function(number_of_times) {
   cumsum(rcauchy(number_of_times)) / 1:number_of_times
 }
@@ -98,3 +164,7 @@ matplot(1:10000, cauchy_matrix, type = "l", lty = 1, col = rgb(1, 0, 0, 0.3),
         main = "Running Averages of Standard Cauchy Distribution")
 abline(h = 0, col = "blue", lty = 2)
 dev.off()
+```
+
+
+- Answer: The plot seems to converge around the expected mean of 0, but will still have outliers still many thousands "rolls" into the experiment. Because the tails are heavy and extreme, any outlier can dominate the mean
