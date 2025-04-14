@@ -30,6 +30,7 @@ Load the following datasets from TUWEL and ensure that missing values are handle
 ```{r setup-import}
 # Load the tidyverse package collection
 library(tidyverse)
+library(dbplyr)
 
 # Set path to data folder
 data_path <- "data"
@@ -99,7 +100,6 @@ Merge the datasets using `dplyr` on a unique key and retain the union of all obs
 
 ```{r merge-data}
 # Merge the three datasets using full_join on 'country'
-
 merged_data <- edu_exp %>%
   full_join(youth_unemp, by = "country") %>%
   full_join(net_mig, by = "country") %>%
