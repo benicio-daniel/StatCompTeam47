@@ -47,12 +47,13 @@ edu_lines <- readLines(file.path(data_path, "rawdata_369.txt"))[-c(1, 2)]
 edu_exp <- tibble(raw = edu_lines) %>%
   separate(raw, into = c("index", "country", "education_expenditure", "year"), 
            sep = "\\s{2,}", extra = "merge", fill = "right") %>%
-  select(country, education_expenditure) %>%
+  select(country, education_expenditure, year) %>%
   mutate(
     country = str_to_lower(country),
     country = str_remove_all(country, "–|−|-"),       # remove various dashes
     country = str_squish(country),                    # normalize whitespace
-    education_expenditure = as.numeric(education_expenditure)
+    education_expenditure = as.numeric(education_expenditure),
+    year = as.integer(year)
   )
 ```
 
@@ -70,7 +71,8 @@ youth_unemp <- read_csv(
     youth_unemployment = 2
   ) %>%
   mutate(
-    country = str_to_lower(country)  # make country names lowercase
+    country = str_to_lower(country),  # make country names lowercase
+    country = str_replace_all(country, "timor\\-?leste", "timorleste")  # unify country name, because of odd duplicates
   )
 ```
   
@@ -82,15 +84,18 @@ mig_lines <- readLines(file.path(data_path, "rawdata_347.txt"))[-c(1, 2)]
 
 # Convert to tibble and split into components
 net_mig <- tibble(raw = mig_lines) %>%
-  separate(raw, into = c("index", "country", "net_migration", "year"), 
+  separate(raw, into = c("index", "country", "net_migration", "year_raw"), 
            sep = "\\s{2,}", extra = "merge", fill = "right") %>%
-  select(country, net_migration) %>%
+  select(country, net_migration, year_raw) %>%
   mutate(
     country = str_to_lower(country),                 # make country names lowercase
     country = str_remove_all(country, "–|−|-"),      # remove dashes
     country = str_squish(country),                   # normalize whitespace
-    net_migration = as.numeric(net_migration)        # convert to numeric
-  )
+    net_migration = as.numeric(net_migration),        # convert to numeric
+    year = str_extract(year_raw, "\\d{4}"),     # extract the 4-digit year
+    year = as.integer(year)
+  ) %>%
+  select(-year_raw)
 ```
 
 
@@ -99,10 +104,17 @@ net_mig <- tibble(raw = mig_lines) %>%
 Merge the datasets using `dplyr` on a unique key and retain the union of all observations.
 
 ```{r merge-data}
-# Merge the three datasets using full_join on 'country'
-merged_data <- edu_exp %>%
-  full_join(youth_unemp, by = "country") %>%
-  full_join(net_mig, by = "country") %>%
+# Rename year columns before joining
+edu_exp_clean <- edu_exp %>%
+  rename(edu_year = year)
+
+net_mig_clean <- net_mig %>%
+  rename(mig_year = year)
+
+# Merge all datasets on 'country'
+merged_data <- youth_unemp %>%
+  full_join(edu_exp_clean, by = "country") %>%
+  full_join(net_mig_clean, by = "country") %>%
   arrange(country)
 ```
 
