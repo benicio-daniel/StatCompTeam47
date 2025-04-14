@@ -27,20 +27,89 @@ The data was sourced from the [CIA World Factbook Archives](https://www.cia.gov/
 
 Load the following datasets from TUWEL and ensure that missing values are handled correctly and column names are clear. Each dataset should ultimately contain only two columns: **country** and the respective variable. Note that some data sets also contain information on the year when the value was last updated.
 
+```{r setup-import}
+# Load the tidyverse package collection
+library(tidyverse)
+
+# Set path to data folder
+data_path <- "data"
+# data_path <- "src/Case_Study_2/data" anscheidnend für knit
+```
   
   * `rawdata_369.txt` which contains the (estimated)  public expenditure on education as a percent of GDP. *Pay attention! The delimiter is 2 or more white spaces (one space would not work as it would separate country names which contain a space); you have to skip the first two lines*. 
   
+```{r import-edu-clean}
+# Read the lines from the file, skipping the first 2
+edu_lines <- readLines(file.path(data_path, "rawdata_369.txt"))[-c(1, 2)]
+
+# Extract country name and expenditure value using regular expressions
+edu_exp <- tibble(
+  country = str_trim(str_replace(edu_lines, "^\\d+\\s+", "") %>% 
+                     str_extract("^[A-Za-z .,'()\\-]+")),
+  education_expenditure = as.numeric(str_extract(edu_lines, "(\\d{1,2}\\.\\d{1,2})(?=\\s+\\d{4})"))
+)
+```
+
+```{r Bsp}
+head(edu_exp)
+```
+
   * `rawdata_373.csv` which contains the (estimated) youth unemployment rate (15-24) per country
   
-  * `rawdata_347.txt`  which contains (estimated) net migration rate per country.
+```{r import-unemployment}
+# Read youth unemployment data from CSV
 
+youth_unemp <- read_csv(
+  file.path(data_path, "rawdata_373.csv"),
+  show_col_types = FALSE
+) %>%
+  select(
+    country = 1,
+    youth_unemployment = 2
+  )
+```
+
+```{r Bsp}
+head(youth_unemp)
+```
+  
+  * `rawdata_347.txt`  which contains (estimated) net migration rate per country.
+  
+```{r import-migration}
+# Read the lines from the file, skipping the first 2
+mig_lines <- readLines(file.path(data_path, "rawdata_347.txt"))[-c(1, 2)]
+
+# Extract country and net migration rate
+net_mig <- tibble(
+  country = str_trim(str_extract(mig_lines, "^[0-9]+\\s+(.*?)\\s{2,}")),
+  net_migration = as.numeric(str_extract(mig_lines, "-?\\d+\\.\\d+"))
+)
+```
+
+```{r Bsp}
+head(net_mig)
+```
 
 ## b. Merging Raw Data
 
 Merge the datasets using `dplyr` on a unique key and retain the union of all observations.
 
+```{r merge-data}
+# Merge the three datasets using full_join on 'country'
+
+merged_data <- edu_exp %>%
+  full_join(youth_unemp, by = "country") %>%
+  full_join(net_mig, by = "country")
+```
+
 - What key are you using for merging?
 - Return the dimensions of the merged dataset.
+
+```{r preview-merged}
+# Check structure and dimensions of the merged dataset
+glimpse(merged_data)
+dim(merged_data)
+```
 
 ## c. Enriching Data with Income Classification
 
@@ -71,10 +140,6 @@ Make adjustments to tidy the data, if necessary.
 - Analyze the distribution of income status across continents by computing absolute and relative frequencies. Comment on the findings.
 
 - Using the distribution of income status across continents, identify which countries are the only ones in their income group across the continent. Discuss briefly.
-
-
-
-
 
 ## f. Further Summary Statistics and Insights
 
