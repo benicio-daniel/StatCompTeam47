@@ -39,19 +39,20 @@ data_path <- "data"
   * `rawdata_369.txt` which contains the (estimated)  public expenditure on education as a percent of GDP. *Pay attention! The delimiter is 2 or more white spaces (one space would not work as it would separate country names which contain a space); you have to skip the first two lines*. 
   
 ```{r import-edu-clean}
-# Read the lines from the file, skipping the first 2
+# Read lines from file, skip first two lines (title and separator)
 edu_lines <- readLines(file.path(data_path, "rawdata_369.txt"))[-c(1, 2)]
 
-# Extract country name and expenditure value using regular expressions
-edu_exp <- tibble(
-  country = str_trim(str_replace(edu_lines, "^\\d+\\s+", "") %>% 
-                     str_extract("^[A-Za-z .,'()\\-]+")),
-  education_expenditure = as.numeric(str_extract(edu_lines, "(\\d{1,2}\\.\\d{1,2})(?=\\s+\\d{4})"))
-)
-```
-
-```{r Bsp}
-head(edu_exp)
+# Convert to tibble with fixed-width fields
+edu_exp <- tibble(raw = edu_lines) %>%
+  separate(raw, into = c("index", "country", "education_expenditure", "year"), 
+           sep = "\\s{2,}", extra = "merge", fill = "right") %>%
+  select(country, education_expenditure) %>%
+  mutate(
+    country = str_to_lower(country),
+    country = str_remove_all(country, "–|−|-"),       # remove various dashes
+    country = str_squish(country),                    # normalize whitespace
+    education_expenditure = as.numeric(education_expenditure)
+  )
 ```
 
   * `rawdata_373.csv` which contains the (estimated) youth unemployment rate (15-24) per country
@@ -66,29 +67,31 @@ youth_unemp <- read_csv(
   select(
     country = 1,
     youth_unemployment = 2
+  ) %>%
+  mutate(
+    country = str_to_lower(country)  # make country names lowercase
   )
-```
-
-```{r Bsp}
-head(youth_unemp)
 ```
   
   * `rawdata_347.txt`  which contains (estimated) net migration rate per country.
   
 ```{r import-migration}
-# Read the lines from the file, skipping the first 2
+# Read lines from file, skip first two lines (header and separator)
 mig_lines <- readLines(file.path(data_path, "rawdata_347.txt"))[-c(1, 2)]
 
-# Extract country and net migration rate
-net_mig <- tibble(
-  country = str_trim(str_extract(mig_lines, "^[0-9]+\\s+(.*?)\\s{2,}")),
-  net_migration = as.numeric(str_extract(mig_lines, "-?\\d+\\.\\d+"))
-)
+# Convert to tibble and split into components
+net_mig <- tibble(raw = mig_lines) %>%
+  separate(raw, into = c("index", "country", "net_migration", "year"), 
+           sep = "\\s{2,}", extra = "merge", fill = "right") %>%
+  select(country, net_migration) %>%
+  mutate(
+    country = str_to_lower(country),                 # make country names lowercase
+    country = str_remove_all(country, "–|−|-"),      # remove dashes
+    country = str_squish(country),                   # normalize whitespace
+    net_migration = as.numeric(net_migration)        # convert to numeric
+  )
 ```
 
-```{r Bsp}
-head(net_mig)
-```
 
 ## b. Merging Raw Data
 
@@ -99,16 +102,20 @@ Merge the datasets using `dplyr` on a unique key and retain the union of all obs
 
 merged_data <- edu_exp %>%
   full_join(youth_unemp, by = "country") %>%
-  full_join(net_mig, by = "country")
+  full_join(net_mig, by = "country") %>%
+  arrange(country)
 ```
 
-- What key are you using for merging?
+- What key are you using for merging? -> Country
 - Return the dimensions of the merged dataset.
 
-```{r preview-merged}
+```{r preview-merged-dim}
 # Check structure and dimensions of the merged dataset
-glimpse(merged_data)
 dim(merged_data)
+```
+
+```{r preview-merged-table}
+merged_data
 ```
 
 ## c. Enriching Data with Income Classification
