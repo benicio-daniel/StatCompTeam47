@@ -135,8 +135,57 @@ merged_data
 Obtain country income classification (low, lower-middle, upper-middle, high) from the [World Bank](https://datahelpdesk.worldbank.org/knowledgebase/articles/906519) and merge it with the dataset.
 
 - Identify common variables between datasets. Can they be used for merging? Why or why not?
+  The only common variable between our existing merged_data and the data from the world bank,
+  is the country name. Although the latter doesn't use lowercase names for the countries.
+  
+```{r}
+library(readxl)
+world_bank_income <- read_excel(file.path(data_path, "CLASS.xlsx"),
+                    sheet = "List of economies",
+                    col_names = TRUE) %>%
+                    select(Code, Economy, `Income group`)
+
+world_bank_income <- world_bank_income %>%
+  mutate(Economy = tolower(Economy),
+         Economy = str_trim(Economy))
+
+merged_data_income <- merged_data %>%
+  left_join(world_bank_income, by = c("country" = "Economy"))
+
+data_without_income <- merged_data_income %>% 
+  filter(is.na(`Income group`))
+
+nrow(data_without_income)
+```
+  As seen above merging World Bank data with our existing data, results in 43 countries
+  not receiving the corresponding data. Does that doesn't mean those countries
+  don't exist in the World Bank data, but that they carry a different name. 
 
 - Since ISO codes are standardized, download and use the [CIA country data codes](https://www.cia.gov/the-world-factbook/references/country-data-codes/) for merging. Make sure you are not losing any of the countries in your original data set when merging.
+
+```{r}
+country_codes <- read.csv(file.path(data_path, "Country_Data_Codes.csv"), stringsAsFactors = FALSE) %>%
+  select(GENC, Name)
+
+clean_income_data <- world_bank_income %>%
+  left_join(country_codes, by = c("Code" = "GENC")) %>%
+  mutate(Economy = ifelse(!is.na(Name), Name, Economy)) %>%  
+  select(-Name)
+
+clean_income_data <- clean_income_data %>%
+  mutate(Economy = tolower(Economy),
+         Economy = str_trim(Economy))
+
+merged_data_income_clean <- merged_data %>%
+  left_join(clean_income_data, by = c("country" = "Economy"))
+
+data_without_income_clean <- merged_data_income_clean %>% 
+  filter(is.na(`Income group`))
+
+nrow(data_without_income_clean)
+```
+This time we receive a much lower result of countries, which don`t have a 
+corresponding value. 
 
 
 ## d.  Adding Geographical Information
@@ -144,7 +193,27 @@ Obtain country income classification (low, lower-middle, upper-middle, high) fro
 Introduce continent and subcontinent (or region) data for each country.
 
 - Find and download an appropriate online resource.
+  
+  The United Nations Statistics Division offers a data set fitting the criteria
+```{r}
+un_stat <- read.csv(file.path(data_path, "UNSD-Methodology.csv"), sep = ";", stringsAsFactors = FALSE) %>%
+  rename(
+    Continent = `Region.Name`,
+    Subcontinent = `Sub.region.Name`,
+    iso3 = `ISO.alpha3.Code`
+  ) %>%
+  select(Continent, Subcontinent, iso3)
+```
+  
 - Merge this information into the dataset, naming the final dataset `df_vars`. Make sure you are not losing any of the countries in your original data set when merging.
+
+```{r}
+df_vars <- merged_data_income_clean %>%
+  left_join(un_stat, by = c("Code" = "iso3"))
+
+summary(df_vars)
+
+```
 
 
 
