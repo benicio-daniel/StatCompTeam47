@@ -255,6 +255,50 @@ Estimate the following based on the observed frequencies in the data:
 
 Investigate whether an overall trend in youth unemployment rate in the high and low income groups reverses when analyzed at the continent level. E.g., does the youth unemployment rate appear lower in low-income countries overall, but higher when controlling for continent? Explain the results and possible reasons behind this paradox.
 
+To explore whether Simpson’s Paradox occurs in this dataset, we analyze youth unemployment rates across income groups at two levels:
+
+1. **Overall (global) level**
+2. **Within each continent**
+
+This allows us to check whether the observed global trend reverses when controlling for continent.
+
+---
+
+### 1. Overall Youth Unemployment by Income Group
+
+```{r simpson-overall-plot}
+ggplot(df_vars, aes(x = `Income group`, y = youth_unemployment, fill = `Income group`)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(
+    title = "Youth Unemployment by Income Group (Overall)",
+    x = "Income Group",
+    y = "Youth Unemployment Rate (%)"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+The overall boxplot suggests that, on average, youth unemployment appears lower in low-income countries compared to higher-income groups.
+
+### 2. Youth Unemployment by continent
+```{r simpson-by-continent-plot}
+ggplot(df_vars, aes(x = `Income group`, y = youth_unemployment, fill = `Income group`)) +
+  geom_boxplot() +
+  facet_wrap(~ Continent) +
+  theme_minimal() +
+  labs(
+    title = "Youth Unemployment by Income Group Within Continents",
+    x = "Income Group",
+    y = "Youth Unemployment Rate (%)"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+The within-continent trends differ from the global pattern. In regions such as Africa and Asia, low-income countries tend to show **higher youth unemployment** than high-income countries, **reversing** the global trend.
+
+This indicates a potential case of **Simpson’s Paradox**: while the aggregated data suggests that low-income countries have lower unemployment, this is due to their concentration in regions with generally lower overall unemployment. When controlling for continent, the underlying association between income level and unemployment becomes visible, revealing that lower income is often linked to higher youth unemployment within regions.
+
+Thus, this analysis provides evidence for Simpson’s Paradox in the relationship between income group and youth unemployment.
+
 
 ## i. Data Export
 
