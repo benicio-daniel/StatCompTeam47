@@ -220,36 +220,191 @@ summary(df_vars)
 ## e. Data Tidiness and Summary Statistics
 
 - Evaluate the tidiness of `df_vars`
+• Column headers are values, not variable names.✅
+• Multiple types of observational units are stored in the same table.✅
+• A single observational unit is stored in multiple tables.✅
+• Variables are stored in both rows and columns.✅
 (observational units, variables, fixed vs. measured variables).
 Make adjustments to tidy the data, if necessary.
+```{r}
+library("tidyverse")
+library(dplyr)
+str(df_vars)
 
+```
+• Multiple variables are stored in one column.✅
+```{r}
+for (col in names(df_vars)) {
+  cat("Unique values in column", col, ":\n")
+  print(unique(df_vars[[col]]))
+  cat("\n")
+}
+```
 - Create a frequency table for the income status variable and briefly interpret the results.
+```{r}
+table(df_vars$`Income group`)
+```
+
+
 
 - Analyze the distribution of income status across continents by computing absolute and relative frequencies. Comment on the findings.
+```{r}
+for (cont in unique(df_vars$Continent)) {
+  cat("Absolute Income group counts for Continent:", cont, "\n")
+  print(table(df_vars$`Income group`[df_vars$Continent == cont]))
+  cat("\n")
+}
+
+for (cont in unique(df_vars$Continent)) {
+  cat("Relative Income group distribution for Continent:", cont, "\n")
+  print(prop.table(table(df_vars$`Income group`[df_vars$Continent == cont])))
+  cat("\n")
+}
+```
+Europe has the highest realtive amount of high income countries, followed by Oceania and America. The lowest is Africa.
+
 
 - Using the distribution of income status across continents, identify which countries are the only ones in their income group across the continent. Discuss briefly.
-
+```{r}
+na.omit(df_vars$country[df_vars$Continent == 'Africa' & df_vars$`Income group` == 'High income'])
+```
+Since in the absolute Table only Africa has a 1 in any position, we could easly filtet for the high income country in africa
 ## f. Further Summary Statistics and Insights
 
 - Create a table of average (mean and median) values for expenditure, youth unemployment rate and net migration rate separated into income status. Make sure that in the output, the ordering of the income classes is proper (i.e., L, LM, UM, H or the other way around). Briefly comment the results and any differences between the mean and median. 
+```{r}
+df_vars %>%
+  mutate(`Income group` = factor(`Income group`, 
+                                 levels = c("High income", "Upper middle income", 
+                                            "Lower middle income", "Low income"))) %>%
+  group_by(`Income group`) %>%
+  summarise(
+    avg_youth_unemp = mean(youth_unemployment, na.rm = TRUE),
+    avg_expend = mean(education_expenditure, na.rm = TRUE),
+    avg_mig_rate = mean(net_migration, na.rm = TRUE),
+    median_youth_unemp = median(youth_unemployment, na.rm = TRUE),
+    median_expend = median(education_expenditure, na.rm = TRUE),
+    median_mig_rate = median(net_migration, na.rm = TRUE)
+  )
+```
+
 
 - Look at the standard deviation and the interquartile range of the variables per income status instead of the location statistics above. Do you gain additional insights? Briefly comment the results. 
-
+```{r}
+df_vars %>%
+  mutate(`Income group` = factor(`Income group`, 
+                                 levels = c("High income", "Upper middle income", 
+                                            "Lower middle income", "Low income"))) %>%
+  group_by(`Income group`) %>%
+  summarise(
+    sd_youth_unemp = sd(youth_unemployment, na.rm = TRUE),
+    sd_expend = sd(education_expenditure, na.rm = TRUE),
+    sd_mig_rate = sd(net_migration, na.rm = TRUE),
+    IQR_youth_unemp = IQR(youth_unemployment, na.rm = TRUE),
+    IQR_expend = IQR(education_expenditure, na.rm = TRUE),
+    IQR_mig_rate = IQR(net_migration, na.rm = TRUE)
+  )
+```
+The results show that high-income countries have the most consistent patterns in youth unemployment and education expenditure, reflecting stable systems and lower variability. Lower-middle income countries display the highest volatility in net migration, suggesting greater economic or political instability. While low-income countries show less variability overall, this may reflect limited resources or structural constraints rather than true consistency. The NA group stands out with unusually high variation, indicating data quality issues or unclassified outliers that should be treated separately.
 
 - Extend the analysis of the statistics median and IQR  to **each income status and continent combination**. Play around with displaying the resulting table. Use `pivot_longer()` and/or 
 `pivot_wider()` to generate different outputs. 
 Discuss the results as well as the readability of the different tables.
+```{r}
+df_vars %>%
+  mutate(`Income group` = factor(`Income group`, 
+                                 levels = c("High income", "Upper middle income", 
+                                            "Lower middle income", "Low income"))) %>%
+  group_by(`Income group`,`Continent`) %>%
+  summarise(
+    sd_youth_unemp = sd(youth_unemployment, na.rm = TRUE),
+    sd_expend = sd(education_expenditure, na.rm = TRUE),
+    sd_mig_rate = sd(net_migration, na.rm = TRUE),
+    IQR_youth_unemp = IQR(youth_unemployment, na.rm = TRUE),
+    IQR_expend = IQR(education_expenditure, na.rm = TRUE),
+    IQR_mig_rate = IQR(net_migration, na.rm = TRUE)
+  )
+
+df_vars %>%
+  mutate(`Income group` = factor(`Income group`, 
+                                 levels = c("High income", "Upper middle income", 
+                                            "Lower middle income", "Low income"))) %>%
+  group_by(`Income group`, Continent) %>%
+  summarise(
+    sd_youth_unemp = sd(youth_unemployment, na.rm = TRUE),
+    sd_expend = sd(education_expenditure, na.rm = TRUE),
+    sd_mig_rate = sd(net_migration, na.rm = TRUE),
+    IQR_youth_unemp = IQR(youth_unemployment, na.rm = TRUE),
+    IQR_expend = IQR(education_expenditure, na.rm = TRUE),
+    IQR_mig_rate = IQR(net_migration, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  pivot_wider(names_from = Continent, values_from = c(sd_youth_unemp, sd_expend, sd_mig_rate,
+                                                      IQR_youth_unemp, IQR_expend, IQR_mig_rate))
+```
  
 - Identify countries performing well in terms of both **youth unemployment** and **net migration rate** (top 25% in net migration and bottom 25% in youth unemployment within their continent).
+```{r}
+# Create a list to store the results
+best_countries <- list()
+
+# Loop through each unique continent
+for (cont in unique(df_vars$Continent)) {
+  
+  # Subset data for this continent
+  sub_df <- df_vars[df_vars$Continent == cont, ]
+  
+  # Define thresholds: low youth unemployment and high net migration
+  youth_unemp_threshold <- quantile(sub_df$youth_unemployment, 0.25, na.rm = TRUE)
+  net_mig_threshold <- quantile(sub_df$net_migration, 0.75, na.rm = TRUE)
+  
+  # Filter for countries meeting both criteria
+  good_performers <- na.omit(sub_df$country[
+    sub_df$youth_unemployment <= youth_unemp_threshold &
+    sub_df$net_migration >= net_mig_threshold
+  ])
+  
+  # Store in the list
+  best_countries[[cont]] <- good_performers
+}
+
+# View result
+best_countries
+```
 
 ## g. Conditional Probabilities
 
 Estimate the following based on the observed frequencies in the data:
 
 - What is the (posterior or conditional) probability that a European country belongs to the high income group? What is the prior probability that a country belongs to the high income group?
+```{r}
+# P(European country)
+p_european_country <- sum(df_vars$Continent == "Europe", na.rm = TRUE) / nrow(df_vars)
+
+# P(High income and European)
+p_high_and_europe <- sum(df_vars$Continent == "Europe" & df_vars$`Income group` == "High income", na.rm = TRUE) / nrow(df_vars)
+
+# Posterior: P(High income | Europe)
+p_high_income_given_europe <- p_high_and_europe / p_european_country
+
+p_high_income_given_europe
+```
+
 
 - Given a country has high youth unemployment (above %25), what is the probability that it also has negative net migration?
 
+```{r}
+# P(Youth unemployment > 25%)
+p_high_youth_unemp <- sum(df_vars$youth_unemployment > 25, na.rm = TRUE) / nrow(df_vars)
+
+# P(Youth unemployment > 25% AND net migration < 0)
+p_youth_unemp_and_neg_mig <- sum(df_vars$youth_unemployment > 25 & df_vars$net_migration < 0, na.rm = TRUE) / nrow(df_vars)
+
+# P(Negative migration | High youth unemployment)
+p_neg_mig_given_high_youth_unemp <- p_youth_unemp_and_neg_mig / p_high_youth_unemp
+
+p_neg_mig_given_high_youth_unemp
+```
 
 ## h. Simpson’s Paradox Analysis
 
