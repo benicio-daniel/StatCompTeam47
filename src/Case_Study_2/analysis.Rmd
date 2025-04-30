@@ -342,6 +342,7 @@ df_vars %>%
   pivot_wider(names_from = Continent, values_from = c(sd_youth_unemp, sd_expend, sd_mig_rate,
                                                       IQR_youth_unemp, IQR_expend, IQR_mig_rate))
 ```
+ All in all, the table with the continents in the header is more readable for comparing within and between income groups and continents. The drwaback is that the table becomes somewhat to long to read clearly on one screen, without scroling. Otherwise it is apparent from the results that oceania has the highest youth unemployment rat, as well as the lowest expenditure.
  
 - Identify countries performing well in terms of both **youth unemployment** and **net migration rate** (top 25% in net migration and bottom 25% in youth unemployment within their continent).
 ```{r}
@@ -389,7 +390,7 @@ p_high_income_given_europe <- p_high_and_europe / p_european_country
 
 p_high_income_given_europe
 ```
-
+Given a country is european, the probability it belongs to a high income group is 84%
 
 - Given a country has high youth unemployment (above %25), what is the probability that it also has negative net migration?
 
@@ -405,7 +406,7 @@ p_neg_mig_given_high_youth_unemp <- p_youth_unemp_and_neg_mig / p_high_youth_une
 
 p_neg_mig_given_high_youth_unemp
 ```
-
+The probability of a high youth unemployment the probabilty is that it has negative net migration is 61%
 ## h. Simpson’s Paradox Analysis
 
 Investigate whether an overall trend in youth unemployment rate in the high and low income groups reverses when analyzed at the continent level. E.g., does the youth unemployment rate appear lower in low-income countries overall, but higher when controlling for continent? Explain the results and possible reasons behind this paradox.
