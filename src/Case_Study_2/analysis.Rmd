@@ -1,8 +1,11 @@
 ---
 title: "Case Study 2"
-author: "First Name, Last Name"
+subtitle: "AKSTA Statistical Computing"
 date: "2025-04-02"
 output: pdf_document
+pdf_document:
+    keep_tex: true
+
 ---
 
 ```{r setup, include=FALSE}
@@ -34,7 +37,7 @@ library(dbplyr)
 
 # Set path to data folder
 data_path <- "data"
-# data_path <- "src/Case_Study_2/data" anscheidnend für knit
+# data_path <- "src/Case_Study_2/data" anscheinend für knit
 ```
   
   * `rawdata_369.txt` which contains the (estimated)  public expenditure on education as a percent of GDP. *Pay attention! The delimiter is 2 or more white spaces (one space would not work as it would separate country names which contain a space); you have to skip the first two lines*. 
@@ -50,7 +53,7 @@ edu_exp <- tibble(raw = edu_lines) %>%
   select(country, education_expenditure, year) %>%
   mutate(
     country = str_to_lower(country),
-    country = str_remove_all(country, "–|−|-"),       # remove various dashes
+    country = str_remove_all(country, "–|-|-"),       # remove various dashes
     country = str_squish(country),                    # normalize whitespace
     education_expenditure = as.numeric(education_expenditure),
     year = as.integer(year)
@@ -89,7 +92,7 @@ net_mig <- tibble(raw = mig_lines) %>%
   select(country, net_migration, year_raw) %>%
   mutate(
     country = str_to_lower(country),                 # make country names lowercase
-    country = str_remove_all(country, "–|−|-"),      # remove dashes
+    country = str_remove_all(country, "–|-|-"),      # remove dashes
     country = str_squish(country),                   # normalize whitespace
     net_migration = as.numeric(net_migration),        # convert to numeric
     year = str_extract(year_raw, "\\d{4}"),     # extract the 4-digit year
@@ -158,7 +161,7 @@ data_without_income <- merged_data_income %>%
 nrow(data_without_income)
 ```
   As seen above merging World Bank data with our existing data, results in 43 countries
-  not receiving the corresponding data. Does that doesn't mean those countries
+  not receiving the corresponding data. That doesn't mean those countries
   don't exist in the World Bank data, but that they carry a different name. 
 
 - Since ISO codes are standardized, download and use the [CIA country data codes](https://www.cia.gov/the-world-factbook/references/country-data-codes/) for merging. Make sure you are not losing any of the countries in your original data set when merging.
@@ -168,16 +171,22 @@ country_codes <- read.csv(file.path(data_path, "Country_Data_Codes.csv"), string
   select(GENC, Name)
 
 clean_income_data <- world_bank_income %>%
-  left_join(country_codes, by = c("Code" = "GENC")) %>%
+  full_join(country_codes, by = c("Code" = "GENC")) %>%
   mutate(Economy = ifelse(!is.na(Name), Name, Economy)) %>%  
   select(-Name)
 
 clean_income_data <- clean_income_data %>%
   mutate(Economy = tolower(Economy),
-         Economy = str_trim(Economy))
+         Economy = str_trim(Economy),
+         Economy = ifelse(Economy == "north macedonia", "macedonia", Economy),
+         Economy = ifelse(Economy == "timor-leste", "timorleste", Economy),
+         Economy = ifelse(Economy == "turkey (turkiye)", "turkey", Economy),
+         Economy = ifelse(Economy == "guinea-bissau", "guineabissau", Economy)
+         )
 
 merged_data_income_clean <- merged_data %>%
-  left_join(clean_income_data, by = c("country" = "Economy"))
+  left_join(clean_income_data, by = c("country" = "Economy")) %>%
+  filter(is.na(Code) | Code != "XKS")
 
 data_without_income_clean <- merged_data_income_clean %>% 
   filter(is.na(`Income group`))
@@ -220,10 +229,10 @@ summary(df_vars)
 ## e. Data Tidiness and Summary Statistics
 
 - Evaluate the tidiness of `df_vars`
-• Column headers are values, not variable names.✅
-• Multiple types of observational units are stored in the same table.✅
-• A single observational unit is stored in multiple tables.✅
-• Variables are stored in both rows and columns.✅
+• Column headers are values, not variable names.
+• Multiple types of observational units are stored in the same table.
+• A single observational unit is stored in multiple tables.
+• Variables are stored in both rows and columns.
 (observational units, variables, fixed vs. measured variables).
 Make adjustments to tidy the data, if necessary.
 ```{r}
@@ -232,7 +241,7 @@ library(dplyr)
 str(df_vars)
 
 ```
-• Multiple variables are stored in one column.✅
+• Multiple variables are stored in one column.
 ```{r}
 for (col in names(df_vars)) {
   cat("Unique values in column", col, ":\n")
@@ -261,7 +270,7 @@ for (cont in unique(df_vars$Continent)) {
   cat("\n")
 }
 ```
-Europe has the highest realtive amount of high income countries, followed by Oceania and America. The lowest is Africa.
+Europe has the highest relative amount of high income countries, followed by Oceania and America. The lowest is Africa.
 
 
 - Using the distribution of income status across continents, identify which countries are the only ones in their income group across the continent. Discuss briefly.
@@ -433,7 +442,8 @@ ggplot(df_vars, aes(x = `Income group`, y = youth_unemployment, fill = `Income g
   ) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
-The overall boxplot suggests that, on average, youth unemployment appears lower in low-income countries compared to higher-income groups.
+The overall boxplot suggests that, on average, youth unemployment appears lower in low-income countries compared to higher-income groups. The figure also shows that the median of youth unemployment rate
+is approximately the same in the categories Low-, Lower middle- and High income.
 
 ### 2. Youth Unemployment by continent
 ```{r simpson-by-continent-plot}
@@ -459,3 +469,12 @@ Thus, this analysis provides evidence for Simpson’s Paradox in the relationshi
 ## i. Data Export
 
 Export the final tidy dataset from e. as a **CSV** with:`;` as a separator; `.` representing missing values; no row names included.  Upload the `.csv` to TUWEL, together with the submission.
+
+```{r}
+write.table(df_vars, 
+            file = "results/df_vars_output.csv", 
+            sep = ";", 
+            na = ".", 
+            row.names = FALSE,
+            quote = TRUE)
+```
