@@ -229,12 +229,15 @@ summary(df_vars)
 ## e. Data Tidiness and Summary Statistics
 
 - Evaluate the tidiness of `df_vars`
-• Column headers are values, not variable names.
-• Multiple types of observational units are stored in the same table.
-• A single observational unit is stored in multiple tables.
-• Variables are stored in both rows and columns.
-(observational units, variables, fixed vs. measured variables).
 Make adjustments to tidy the data, if necessary.
+
+Here are the criteria for untidy data:
+• Column headers are values, not variable names. (Columns are variable names✅)
+• Multiple types of observational units are stored in the same table.(Only Countries are observational units✅), unless you count a obbservational unit as a countriy or year
+• A single observational unit is stored in multiple tables. (One table ✅)
+• Variables are stored in both rows and columns. (✅)
+(observational units, variables, fixed vs. measured variables).
+
 ```{r}
 library("tidyverse")
 library(dplyr)
@@ -242,6 +245,7 @@ str(df_vars)
 
 ```
 • Multiple variables are stored in one column.
+Here we simply check, if a singular values do not cohere with the rest of the values in any column.(Doesnt seem to be✅)
 ```{r}
 for (col in names(df_vars)) {
   cat("Unique values in column", col, ":\n")
@@ -249,6 +253,7 @@ for (col in names(df_vars)) {
   cat("\n")
 }
 ```
+So the Data is mostly tidy, and doesnt fulfill any of the criteria for untidy data. The only contension could be how you interpret the singular observational unit. If you only count a country as one, we are in the clear. If one observational unit is a country and a year, than we have to pivot. The argument against this are the probable NA missing values, as they pose a risk to have a associated value in either the netmigration or other columns, but have a missing NA year value for another column. Therefore we decided to not pivot and extract data as needed and pivot on demand.
 - Create a frequency table for the income status variable and briefly interpret the results.
 ```{r}
 table(df_vars$`Income group`)
@@ -277,7 +282,7 @@ Europe has the highest relative amount of high income countries, followed by Oce
 ```{r}
 na.omit(df_vars$country[df_vars$Continent == 'Africa' & df_vars$`Income group` == 'High income'])
 ```
-Since in the absolute Table only Africa has a 1 in any position, we could easly filtet for the high income country in africa
+Since in the absolute Table only Africa has a 1 in any position, we could easily filter for the high income country in Africa
 ## f. Further Summary Statistics and Insights
 
 - Create a table of average (mean and median) values for expenditure, youth unemployment rate and net migration rate separated into income status. Make sure that in the output, the ordering of the income classes is proper (i.e., L, LM, UM, H or the other way around). Briefly comment the results and any differences between the mean and median. 
@@ -296,7 +301,7 @@ df_vars %>%
     median_mig_rate = median(net_migration, na.rm = TRUE)
   )
 ```
-
+Upper middle income countries exhibit the highest average youth unemployment rate (22.81%), even higher than low income (15.40%) and high income (16.47%) countries. In terms of education expenditure, the average spending increases with income, ranging from 3.59 in low income countries to 4.56 in high income countries, which aligns with expectations. High income countries have a positive average migration rate (1.46), indicating that they are generally immigration destinations. In contrast, all other groups show negative average migration rates, with lower middle income countries experiencing the steepest outflow (-3.95).
 
 - Look at the standard deviation and the interquartile range of the variables per income status instead of the location statistics above. Do you gain additional insights? Briefly comment the results. 
 ```{r}
@@ -351,7 +356,7 @@ df_vars %>%
   pivot_wider(names_from = Continent, values_from = c(sd_youth_unemp, sd_expend, sd_mig_rate,
                                                       IQR_youth_unemp, IQR_expend, IQR_mig_rate))
 ```
- All in all, the table with the continents in the header is more readable for comparing within and between income groups and continents. The drwaback is that the table becomes somewhat to long to read clearly on one screen, without scroling. Otherwise it is apparent from the results that oceania has the highest youth unemployment rat, as well as the lowest expenditure.
+ All in all, the table with the continents in the header is more readable for comparing within and between income groups and continents. The drawback is that the table becomes somewhat to long to read clearly on one screen, without scrolling. Otherwise it is apparent from the results that Oceania has the highest youth unemployment rat, as well as the lowest expenditure.
  
 - Identify countries performing well in terms of both **youth unemployment** and **net migration rate** (top 25% in net migration and bottom 25% in youth unemployment within their continent).
 ```{r}
