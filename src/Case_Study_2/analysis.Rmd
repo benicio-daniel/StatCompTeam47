@@ -30,14 +30,13 @@ The data was sourced from the [CIA World Factbook Archives](https://www.cia.gov/
 
 Load the following datasets from TUWEL and ensure that missing values are handled correctly and column names are clear. Each dataset should ultimately contain only two columns: **country** and the respective variable. Note that some data sets also contain information on the year when the value was last updated.
 
-```{r setup-import}
+```{r setup-import, message=FALSE}
 # Load the tidyverse package collection
 library(tidyverse)
 library(dbplyr)
 
 # Set path to data folder
 data_path <- "data"
-# data_path <- "src/Case_Study_2/data" anscheinend für knit
 ```
   
   * `rawdata_369.txt` which contains the (estimated)  public expenditure on education as a percent of GDP. *Pay attention! The delimiter is 2 or more white spaces (one space would not work as it would separate country names which contain a space); you have to skip the first two lines*. 
