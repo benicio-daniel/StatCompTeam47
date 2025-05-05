@@ -228,15 +228,12 @@ summary(df_vars)
 ## e. Data Tidiness and Summary Statistics
 
 - Evaluate the tidiness of `df_vars`
-Make adjustments to tidy the data, if necessary.
-
-Here are the criteria for untidy data:
-• Column headers are values, not variable names. (Columns are variable names✅)
-• Multiple types of observational units are stored in the same table.(Only Countries are observational units✅), unless you count a obbservational unit as a countriy or year
-• A single observational unit is stored in multiple tables. (One table ✅)
-• Variables are stored in both rows and columns. (✅)
+• Column headers are values, not variable names.
+• Multiple types of observational units are stored in the same table.
+• A single observational unit is stored in multiple tables.
+• Variables are stored in both rows and columns.
 (observational units, variables, fixed vs. measured variables).
-
+Make adjustments to tidy the data, if necessary.
 ```{r}
 library("tidyverse")
 library(dplyr)
@@ -244,7 +241,7 @@ str(df_vars)
 
 ```
 • Multiple variables are stored in one column.
-Here we simply check, if a singular values do not cohere with the rest of the values in any column.(Doesnt seem to be✅)
+Here we simply check, if a singular values do not cohere with the rest of the values in any column.
 ```{r}
 for (col in names(df_vars)) {
   cat("Unique values in column", col, ":\n")
