@@ -18,9 +18,27 @@ knitr::opts_chunk$set(echo = FALSE)
 # Data
 
 Load the data set you exported in the final Task of Case Study 2. 
-Eliminate all
-observations with missing values in the income status variable.
+Eliminate all observations with missing values in the income status variable.
 
+```{r setup-import, message=FALSE}
+# Load necessary libraries
+library(tidyverse)
+library(ggplot2)
+library(readr)
+library(dplyr)
+
+# Load dataset from the data folder
+data <- read_csv("data/file_out2.csv")
+```
+
+````{r load data}
+# View the dimension and first few rows
+dim(data)
+head(data)
+
+# View column names
+colnames(data)
+```
 
 As a reminder, the data set includes world data from 2020, focusing on:
 
@@ -50,8 +68,47 @@ income status such that in the plots the legend is ordered from High (H) to Low 
   * Position the legend at the top center of the plot and give it no title (hint: use `element_blank()`).
   
   * Rename the x axis as "Education expenditure (% of GDP)"
+  
+```{r density plot of the education expenditure, warning=FALSE}
+# Recode status
+data$income_status <- recode(data$status,
+                             "H" = "High",
+                             "UM" = "Upper middle",
+                             "LM" = "Lower middle",
+                             "L" = "Low")
 
-  Comment briefly on the plot.
+# Clean expenditure
+data$expenditure[data$expenditure == "."] <- NA
+data$expenditure <- as.numeric(data$expenditure)
+
+# Factor levels in correct order
+data$income_status <- factor(data$income_status,
+                             levels = c("High", "Upper middle", "Lower middle", "Low"))
+
+# Filter valid data (remove NAs in both variables)
+data_clean <- data %>%
+  filter(!is.na(expenditure), !is.na(income_status))
+
+# Plot
+ggplot(data_clean, aes(x = expenditure, fill = income_status)) +
+  geom_density(alpha = 0.5, color = "black") +
+  labs(x = "Education expenditure (% of GDP)", y = "Density", fill = NULL) +
+  theme_minimal() +
+  theme(
+    legend.position = "top",
+    legend.title = element_blank(),
+    legend.justification = "center"
+  )
+```
+  
+Comment briefly on the plot.
+
+The plot shows the distribution of education expenditure (as a percentage of GDP) across four income groups: High, Upper middle, Lower middle, and Low. Each group's density curve is distinct, with:
+
+- Low-income countries having a broader and lower-spending distribution, peaking around 2–3%.
+- High and upper-middle income countries clustering more tightly between 4–6%.
+- Lower-middle income countries show a more spread-out distribution, with some countries spending over 10%.
+- This suggests that low-income countries tend to allocate a smaller share of GDP to education, though there's significant variation across all groups. 
 
 ## b. Income status in different continents
 
@@ -84,8 +141,6 @@ which country in Asia constitutes the largest positive outlier.
 
 * Comment on the plot.
 
-
-
 ## e. Net migration in different subcontinents
 
 The graph in d. clearly does not convey the whole picture. It would be interesting also 
@@ -98,8 +153,6 @@ using again parallel boxplots.  Group the boxplots by continent (hint: use `face
 * Remember to prettify the plot (rotate axis labels if needed).
 
 * Describe what you see.
-
-
 
 ## f. Median net migration rate per subcontinent.
 
