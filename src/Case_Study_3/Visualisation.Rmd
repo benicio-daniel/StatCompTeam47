@@ -161,11 +161,14 @@ This plot shows the proportion of each income group within every continent. Afri
 # Create a mosaic plot of continent and income status using base R
 mosaicplot(~ continent + income_status, data = data_filtered, color = TRUE,
            main = "Mosaic Plot of Income Status by Continent",
-           xlab = "Continent", ylab = "Income Status")
+           xlab = "Continent", ylab = "Income Status", las = 1)  # las=1 makes labels horizontal
 ````
 
 * Briefly comment on the differences between the three plots generated to investigate the income 
 distribution among the different continents.
+
+The stacked barplot of absolute frequencies shows how many entities from each income group exist per continent, making it easy to compare total counts but harder to compare internal proportions. The relative stacked barplot standardizes the height of bars, allowing clearer comparison of income distribution within each continent, independent of how many countries each has. The mosaic plot combines both aspects: bar width reflects the number of countries per continent, while segment height shows the income breakdown, offering a compact overview of both size and structure.
+
 
 ## c. Income status in different subcontinents
 
