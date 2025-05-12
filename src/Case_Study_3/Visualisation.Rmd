@@ -52,6 +52,7 @@ to the dataset in Case Study 2.
 
 # Tasks:
 
+
 ## a. Education expenditure in different income levels
 
 Using **ggplot2**, create a density plot of the education expenditure grouped by income 
@@ -101,7 +102,7 @@ ggplot(data_clean, aes(x = expenditure, fill = income_status)) +
   )
 ```
   
-Comment briefly on the plot.
+Comment briefly on the plot:
 
 The plot shows the distribution of education expenditure (as a percentage of GDP) across four income groups: High, Upper middle, Lower middle, and Low. Each group's density curve is distinct, with:
 
@@ -110,16 +111,58 @@ The plot shows the distribution of education expenditure (as a percentage of GDP
 - Lower-middle income countries show a more spread-out distribution, with some countries spending over 10%.
 - This suggests that low-income countries tend to allocate a smaller share of GDP to education, though there's significant variation across all groups. 
 
+
 ## b. Income status in different continents
 
 Investigate how the income status is distributed in the different continents. 
 
-* Using **ggplot2**, create a stacked barplot of absolute frequencies showing how the entities are split into continents and income status. Comment the plot.
+* Using **ggplot2**, create a stacked barplot of absolute frequencies showing how the entities are split into continents and income status.
+````{r stacked barplot of absolute frequencies}
+# Filter out rows with missing income status (NA values)
+data_filtered <- subset(data, !is.na(income_status))
+
+# Create a stacked barplot of absolute frequencies by continent and income status
+ggplot(data_filtered, aes(x = continent, fill = income_status)) +
+  geom_bar(position = "stack") +
+  labs(title = "Income Status Distribution Across Continents",
+       x = "Continent",
+       y = "Number of Entities",
+       fill = "Income Status") +
+  theme_minimal()
+
+```
+Comment the plot:
+
+The plot shows that income status is unevenly distributed across continents. Africa has the highest number of low- and lower-middle-income entities, while Europe and the Americas are dominated by high-income entities. Asia shows a more balanced distribution across income levels, and Oceania has fewer entities overall, mostly in the high- and upper-middle-income groups. This highlights global disparities in economic development.
+
 
 * Create another stacked barplot of relative frequencies (height of the bars should be one).
-Comment the plot.
+```{r stacked barplot of relative frequencie}
 
-* Create a mosaic plot of continents and income status using base R functions. 
+# Create a stacked barplot of relative frequencies (proportions) by continent and income status
+ggplot(data_filtered, aes(x = continent, fill = income_status)) +
+  geom_bar(position = "fill") +
+  labs(title = "Relative Income Status Distribution Across Continents",
+       x = "Continent",
+       y = "Proportion",
+       fill = "Income Status") +
+  theme_minimal()
+
+```
+
+Comment the plot:
+
+This plot shows the proportion of each income group within every continent. Africa is dominated by low- and lower-middle-income entities, with very few high-income countries. In contrast, Europe and the Americas have a much higher proportion of high-income entities. Asia displays a more balanced distribution across all income categories. Oceania is also primarily composed of high- and upper-middle-income entities. The presence of the “NA” category in some regions indicates missing or unclassified data. This plot allows for easier comparison of the internal income structure within continents, independent of their overall size.
+
+
+* Create a mosaic plot of continents and income status using base R functions.
+````{r mosaic plot}
+
+# Create a mosaic plot of continent and income status using base R
+mosaicplot(~ continent + income_status, data = data_filtered, color = TRUE,
+           main = "Mosaic Plot of Income Status by Continent",
+           xlab = "Continent", ylab = "Income Status")
+````
 
 * Briefly comment on the differences between the three plots generated to investigate the income 
 distribution among the different continents.
@@ -207,9 +250,6 @@ the x-axis.
   * Comment on the plot. E.g., what are the regions with the highest vs lowest youth
   unemployment rate?
   
-
-
-
 ## h. Median youth unemployment rate per subcontinent -- with error bars
 
 The value displayed in the barplot in g. is the result of an aggregation, 
@@ -239,9 +279,6 @@ any difference among the income levels?
 
 Create a plot as in Task i. but for youth unemployment and net migration rate. Comment briefly.
 
-
-
-
 ## k. Merging population data
 
 Go online and find a data set which contains the 2020 population for the countries of the world
@@ -265,10 +302,6 @@ Make a scatterplot of education expenditure and net migration rate for the count
   * Remove the legend.
   
   * Comment on the plot.
-
-
-
-
 
 ## m. Interactive plot
 
