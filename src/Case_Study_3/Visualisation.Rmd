@@ -196,14 +196,47 @@ The plot shows clear differences in income status across Oceania’s subregions,
 ## d. Net migration in different continents
 
 * Using **ggplot2**, create parallel boxplots  showing  the distribution of the
-net migration rate in the different continents. 
+net migration rate in the different continents.
+```{r parallel boxplots}
+ggplot(data_filtered, aes(x = continent, y = net_migr_rate)) +
+  geom_boxplot()
+```
 
 * Prettify the plot (change y-, x-axis labels, etc).
+```{r prettified parallel boxplots}
+ggplot(data_filtered, aes(x = continent, y = net_migr_rate, fill = continent)) +
+  geom_boxplot(outlier.shape = NA, color = "black") +  # Outliers hidden, but data still used
+  coord_cartesian(ylim = c(-20, 20)) +  # Focus on main distribution
+  scale_fill_brewer(palette = "Set2") +
+  labs(
+    title = "Net Migration Rate by Continent",
+    x = "Continent",
+    y = "Net Migration Rate (per 1,000 population)",
+    fill = "Continent"
+  ) +
+  theme_minimal(base_size = 13)
+```
 
 * Identify which country in Asia constitutes the largest negative outlier and 
-which country in Asia constitutes the largest positive outlier. 
+which country in Asia constitutes the largest positive outlier.
+```{r Identifying Asian outliers}
+# Filter Asian countries with valid net migration data
+asia_data <- data_filtered %>%
+  filter(continent == "Asia", !is.na(net_migr_rate))
+
+# Identify largest positive outlier
+asia_data %>%
+  filter(net_migr_rate == max(net_migr_rate))
+
+# Identify largest negative outlier
+asia_data %>%
+  filter(net_migr_rate == min(net_migr_rate))
+```
 
 * Comment on the plot.
+
+First, a standard boxplot was created to visualize the distribution of net migration rates across continents. It revealed the presence of strong outliers, especially in Asia. In a second step, the plot was improved by adjusting axis labels, coloring the boxes by continent, hiding outliers for clarity, and limiting the y-axis range to focus on the main distribution. Finally, the most extreme outliers in Asia were identified: Lebanon with the most negative net migration rate and Syria with the highest positive rate.
+
 
 ## e. Net migration in different subcontinents
 
@@ -212,11 +245,34 @@ to look at the subcontinents, as it is likely that a lot of migration flows
 happen within the continent.
 
 * Investigate the net migration in different subcontinents
-using again parallel boxplots.  Group the boxplots by continent (hint: use `facet_grid` with `scales = "free_x"`).
+using again parallel boxplots. Group the boxplots by continent (hint: use `facet_grid` with `scales = "free_x"`).
+```{r grouped boxplots}
+ggplot(data_filtered, aes(x = subcontinent, y = net_migr_rate)) +
+  geom_boxplot() +
+  facet_grid(. ~ continent, scales = "free_x")
+```
 
 * Remember to prettify the plot (rotate axis labels if needed).
+```{r prettified grouped boxplots}
+ggplot(data_filtered, aes(x = subcontinent, y = net_migr_rate)) +
+  geom_boxplot(fill = "skyblue", color = "black", outlier.color = "red") +
+  facet_grid(. ~ continent, scales = "free_x", space = "free_x") +
+  labs(
+    title = "Net Migration Rate by Subcontinent",
+    x = "Subcontinent",
+    y = "Net Migration Rate (per 1,000 population)"
+  ) +
+  coord_cartesian(ylim = c(-20, 20)) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
 
 * Describe what you see.
+
+The plot reveals clear differences in net migration rates across subcontinents. Northern America and Western Europe show consistently high net migration rates, while regions such as Melanesia, Micronesia, and Western Asia tend to have more negative values. Notably, the Caribbean and Sub-Saharan Africa show a large number of outliers in both directions, suggesting strong variability or unstable migration patterns within those subregions.
+
+While the cleaned-up version of the plot with limited y-axis and hidden outliers offers a clearer overview of general patterns, it also masks extreme individual cases. This highlights that polished graphics can improve readability but may hide important details, and should therefore be interpreted with care.
+
 
 ## f. Median net migration rate per subcontinent.
 
