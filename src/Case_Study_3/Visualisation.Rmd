@@ -133,7 +133,7 @@ ggplot(data_filtered, aes(x = continent, fill = income_status)) +
 ```
 Comment the plot:
 
-The plot shows that income status is unevenly distributed across continents. Africa has the highest number of low- and lower-middle-income entities, while Europe and the Americas are dominated by high-income entities. Asia shows a more balanced distribution across income levels, and Oceania has fewer entities overall, mostly in the high- and upper-middle-income groups. This highlights global disparities in economic development.
+The plot shows that income status is unevenly distributed across continents by displaying how many countries from each income group exist per continent. It highlights that Africa has the most low- and lower-middle-income countries, while Europe and the Americas include more high-income countries, reflecting global economic disparities.
 
 
 * Create another stacked barplot of relative frequencies (height of the bars should be one).
@@ -152,7 +152,7 @@ ggplot(data_filtered, aes(x = continent, fill = income_status)) +
 
 Comment the plot:
 
-This plot shows the proportion of each income group within every continent. Africa is dominated by low- and lower-middle-income entities, with very few high-income countries. In contrast, Europe and the Americas have a much higher proportion of high-income entities. Asia displays a more balanced distribution across all income categories. Oceania is also primarily composed of high- and upper-middle-income entities. The presence of the “NA” category in some regions indicates missing or unclassified data. This plot allows for easier comparison of the internal income structure within continents, independent of their overall size.
+This plot shows the proportion of each income group within every continent. It reveals that Africa has a high internal share of low-income countries, while Europe and Oceania are mostly composed of high-income entities, highlighting differences in internal economic composition.
 
 
 * Create a mosaic plot of continents and income status using base R functions.
@@ -165,15 +165,33 @@ mosaicplot(~ continent + income_status, data = data_filtered, color = TRUE,
 ````
 
 * Briefly comment on the differences between the three plots generated to investigate the income 
-distribution among the different continents.
+distribution among the different continents:
 
 The stacked barplot of absolute frequencies shows how many entities from each income group exist per continent, making it easy to compare total counts but harder to compare internal proportions. The relative stacked barplot standardizes the height of bars, allowing clearer comparison of income distribution within each continent, independent of how many countries each has. The mosaic plot combines both aspects: bar width reflects the number of countries per continent, while segment height shows the income breakdown, offering a compact overview of both size and structure.
+
+Africa has the highest number and internal share of low- and lower-middle-income countries, while Europe and the Americas are dominated by high-income entities. Asia shows a more balanced distribution across all income categories, and Oceania is primarily composed of high- and upper-middle-income countries. These visualizations highlight both the unequal distribution of income status between continents and differences in their internal income structures.
 
 
 ## c. Income status in different subcontinents
 
 For Oceania, investigate further how the income status distribution is in the different subcontinents.
-Use one of the plots in b. for this purpose. Comment on the results.
+Use one of the plots in b. for this purpose. 
+```{r Oceania plot}
+# Filter for Oceania only
+oceania_data <- data_filtered %>% filter(continent == "Oceania")
+
+# Plot income distribution by subregion within Oceania
+ggplot(oceania_data, aes(x = subcontinent, fill = income_status)) +
+  geom_bar(position = "fill") +
+  labs(title = "Relative Income Status Distribution in Oceania Subregions",
+       x = "Subregion", y = "Proportion", fill = "Income Status") +
+  theme_minimal()
+```
+
+Comment on the results:
+
+The plot shows clear differences in income status across Oceania’s subregions, based on the countries classified within them. Australia and New Zealand consist entirely of high-income countries, while Melanesia mainly includes lower-middle-income countries. Polynesia is dominated by upper-middle-income countries. Micronesia shows a more balanced distribution across high- and lower-middle-income levels, with only a small share in the upper-middle-income group. Notably, no countries in Oceania are classified as low-income. This highlights economic variation between subregions, with wealth concentrated in the southern part of Oceania and more diverse income levels across the island regions.
+
 
 ## d. Net migration in different continents
 
