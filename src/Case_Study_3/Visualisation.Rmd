@@ -31,7 +31,7 @@ library(dplyr)
 data <- read_csv("data/file_out2.csv")
 ```
 
-````{r load data}
+```{r load data}
 # View the dimension and first few rows
 dim(data)
 head(data)
@@ -117,7 +117,7 @@ The plot shows the distribution of education expenditure (as a percentage of GDP
 Investigate how the income status is distributed in the different continents. 
 
 * Using **ggplot2**, create a stacked barplot of absolute frequencies showing how the entities are split into continents and income status.
-````{r stacked barplot of absolute frequencies}
+```{r stacked barplot of absolute frequencies}
 # Filter out rows with missing income status (NA values)
 data_filtered <- subset(data, !is.na(income_status))
 
@@ -156,13 +156,13 @@ This plot shows the proportion of each income group within every continent. It r
 
 
 * Create a mosaic plot of continents and income status using base R functions.
-````{r mosaic plot}
+```{r mosaic plot}
 
 # Create a mosaic plot of continent and income status using base R
 mosaicplot(~ continent + income_status, data = data_filtered, color = TRUE,
            main = "Mosaic Plot of Income Status by Continent",
            xlab = "Continent", ylab = "Income Status", las = 1)  # las=1 makes labels horizontal
-````
+```
 
 * Briefly comment on the differences between the three plots generated to investigate the income 
 distribution among the different continents:
@@ -300,6 +300,36 @@ the x-axis.
   
   * Comment on the plot. E.g., what are the regions with the most influx? 
   What are the regions with the most outflux?
+```{r median net migration rate per subcontinent}
+library(forcats)
+
+# Define colorblind-friendly palette
+colorblind_palette <- c(
+  "#999999", "#E69F00", "#56B4E9", "#009E73",
+  "#F0E442", "#0072B2", "#D55E00", "#CC79A7"
+)
+
+# Calculate medians per subcontinent
+median_data <- data_filtered %>%
+  group_by(subcontinent, continent) %>%
+  summarise(median_net_migr = median(net_migr_rate, na.rm = TRUE), .groups = 'drop')
+
+# Reorder subcontinents by median migration rate
+median_data <- median_data %>%
+  mutate(subcontinent = fct_reorder(subcontinent, median_net_migr))
+
+# Plot
+ggplot(median_data, aes(x = median_net_migr, y = subcontinent, color = continent)) +
+  geom_point(size = 3) +
+  scale_color_manual(values = colorblind_palette) +
+  labs(
+    title = "Median Net Migration Rate by Subcontinent",
+    x = "Median Net Migration Rate (per 1,000 population)",
+    y = "Subcontinent",
+    color = "Continent"
+  ) +
+  theme_minimal(base_size = 13)
+```
 
 
 ## g. Median youth unemployment rate per subcontinent
@@ -326,7 +356,34 @@ the x-axis.
   
   * Comment on the plot. E.g., what are the regions with the highest vs lowest youth
   unemployment rate?
-  
+```{r}
+# Clean the correct column
+data_filtered$youth_unempl_rate <- as.character(data_filtered$youth_unempl_rate)
+data_filtered$youth_unempl_rate[data_filtered$youth_unempl_rate == "."] <- NA
+data_filtered$youth_unempl_rate <- as.numeric(data_filtered$youth_unempl_rate)
+
+
+median_data <- data_filtered %>%
+  group_by(subcontinent, continent) %>%
+  summarise(
+    median_youth_unempl_rate = median(youth_unempl_rate, na.rm = TRUE),
+    .groups = 'drop'
+  ) %>%
+  mutate(subcontinent = fct_reorder(subcontinent, median_youth_unempl_rate))
+
+# Plot
+ggplot(median_data, aes(x = median_youth_unempl_rate, y = subcontinent, fill = continent)) +
+  geom_bar(stat = "identity", alpha = 0.7) +
+  scale_fill_manual(values = colorblind_palette) +
+  labs(
+    title = "Median Youth Unemployment by Subcontinent",
+    x = "Median Youth Unemployment Rate (%)",
+    y = "Subcontinent",
+    fill = "Continent"
+  ) +
+  theme_bw(base_size = 13)
+```
+
 ## h. Median youth unemployment rate per subcontinent -- with error bars
 
 The value displayed in the barplot in g. is the result of an aggregation, 
@@ -337,6 +394,35 @@ the variable in each of the subcontinents.
 
 Repeat the plot from Task g. but include also error bars which reflect the 25% and 75%
 quantiles. You can use `geom_errorbar` in **ggplot2**.
+```{r}
+# Clean the correct column
+data_filtered$youth_unempl_rate <- as.character(data_filtered$youth_unempl_rate)
+data_filtered$youth_unempl_rate[data_filtered$youth_unempl_rate == "."] <- NA
+data_filtered$youth_unempl_rate <- as.numeric(data_filtered$youth_unempl_rate)
+
+
+median_data <- data_filtered %>%
+  group_by(subcontinent, continent) %>%
+  summarise(
+  median_youth_unempl_rate = median(youth_unempl_rate, na.rm = TRUE),
+  q25 = quantile(youth_unempl_rate, 0.25, na.rm = TRUE),
+  q75 = quantile(youth_unempl_rate, 0.75, na.rm = TRUE),
+  .groups = "drop") %>%
+  mutate(subcontinent = fct_reorder(subcontinent, median_youth_unempl_rate))
+
+# Plot
+ggplot(median_data, aes(x = median_youth_unempl_rate, y = subcontinent, fill = continent)) +
+  geom_bar(stat = "identity", alpha = 0.7) +
+  geom_errorbar(aes(xmin = q25, xmax = q75), width = 0.2) +
+  scale_fill_manual(values = colorblind_palette) +
+  labs(
+    title = "Median Youth Unemployment by Subcontinent",
+    x = "Median Youth Unemployment Rate (%)",
+    y = "Subcontinent",
+    fill = "Continent"
+  ) +
+  theme_bw(base_size = 13)
+```
 
 
 
@@ -351,10 +437,37 @@ net migration rate.
   
 Comment on the plot. Do you see any relationship between the two variables? Do you see
 any difference among the income levels?
+```{r}
+ggplot(data_filtered, aes(x = expenditure, y = net_migr_rate, color = income_status)) +
+  #geom_point(alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_manual(values = colorblind_palette) +
+  labs(
+    title = "Relationship between Education Expenditure and Net Migration Rate",
+    x = "Education Expenditure (% of GDP)",
+    y = "Net Migration Rate (per 1,000 population)",
+    color = "Income Status"
+  ) +
+  theme_bw(base_size = 13)
+```
 
 ## j. Relationship between youth unemployment and net migration rate
 
 Create a plot as in Task i. but for youth unemployment and net migration rate. Comment briefly.
+```{r}
+ggplot(data_filtered, aes(x = youth_unempl_rate, y = net_migr_rate, color = income_status)) +
+  #geom_point(alpha = 0.7) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_manual(values = colorblind_palette) +
+  labs(
+    title = "Relationship between Youth Unemployment and Net Migration Rate",
+    x = "Youth Unemplyment",
+    y = "Net Migration Rate (per 1,000 population)",
+    color = "Income Status"
+  ) +
+  theme_bw(base_size = 13)
+```
+
 
 ## k. Merging population data
 
