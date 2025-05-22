@@ -597,7 +597,31 @@ It is often used for identifying clusters in the data.
 One can create such a plot using the **GGally** R package. You should create 
 such a plot where you look at the three main variables in the data set: 
 education expenditure, youth unemployment rate and net migration rate. 
-Color the lines based on the income status. Briefly comment.
+Color the lines based on the income status.
+
+```{r}
+library(GGally)
+ggally_plotdata <- merged_data %>%
+  select(expenditure, youth_unempl_rate, net_migr_rate, income_status)
+
+parallel_plot <- ggparcoord(data = ggally_plotdata,
+                           columns = 1:3,  
+                           groupColumn = 4,  
+                           scale = "center",    
+                           alphaLines = 0.6, 
+                           title = "Parallel Coordinate Plot: \nEducation expenditure, Youth Unemployment, and Net Migration") +
+  
+  theme_minimal() +
+  labs(color = "Income Status",
+       x = "",
+       y = "Standardized Values") 
+
+print(parallel_plot)
+```
+Briefly comment.
+All countries sorted by income status have an overall spread spread expenditure on education, while most higher income states
+seem to spend the global average or higher than that. The focusing on youth employment and net migration rate the picture becomes clearer for high income states most of them have a relatively low youth employment rate and a positive migration.
+Some upper and lower middle are under the top spenders of education purposes but also some of those show the highest youth_employment rate. Many low income states have lower education expenditure compared to the global average but also show the lowest values of youth employment. 
 
 
 ## o. World map visualisation
