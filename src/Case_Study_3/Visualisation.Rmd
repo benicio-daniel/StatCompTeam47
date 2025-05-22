@@ -478,12 +478,54 @@ together with ISO codes.
 this case study using a left join.
 (A possible source: [World Bank](https://data.worldbank.org/indicator/SP.POP.TOTL?end=2020&start=2020)))
 
+
+Fetching the population data from above mentioned link and extracting a table containing
+Country Name, Country Code and Population data of 2020
+```{r}
+library(readxl)
+file_path <- "./data/pop_data.xls"
+pop_data <- read_excel(file.path(file_path))
+pop_data_2020 <- pop_data %>%
+  select(
+    `Country Name`,
+    `Country Code`,
+    `2020`
+  ) %>%
+  rename(
+    population = `2020`
+  )
+
+```
+
+Merging the data into *data_filtered* - the dataset I am working on.
+
+```{r}
+merged_data <- data_filtered %>%
+  left_join(pop_data_2020, by = c("ISO3" = "Country Code")) 
+```
+
 * Inspect the data and check whether the join worked well.
+```{r}
+merged_data <- data_filtered %>%
+  left_join(pop_data_2020, by = c("ISO3" = "Country Code")) 
 
+data_without_pop_info <- merged_data %>% 
+  filter(is.na(`population`))
 
+nrow(data_without_pop_info)
+```
+The result of the merge shows only one country not receiving population data. The
+reason is that the country *Taiwan* is not in the population dataset of the world
+bank. So it can be said the merge was successful.
+ 
 ## l. Scatterplot of education expenditure and net migration rate in Europe 
 
 Make a scatterplot of education expenditure and net migration rate for the countries of Europe. 
+
+```{r}
+europe_data <- merged_data %>%
+  filter(continent == "Europe")
+```
 
   * Scale the size of the points according to each country's population. 
  
@@ -491,7 +533,25 @@ Make a scatterplot of education expenditure and net migration rate for the count
   
   * Remove the legend.
   
+```{r}
+ggplot(europe_data, aes(x = net_migr_rate, y = expenditure)) +
+  geom_point(aes(size = population), alpha = 0.7) +
+  scale_size_continuous(range = c(2, 15)) +
+  labs(
+    x = "net migration rate",
+    y = "education expenditure" 
+  ) +
+  theme_minimal() + 
+  theme(legend.position = "none") 
+```  
+  
   * Comment on the plot.
+  
+  Countries with the biggest population count have a positive net migration rate
+  as well as all countries which spend more than 6 % of their gdp on education.
+  Other than that no further comments on correlation can be made, as the data 
+  is scattered around the scatterplot. 
+  
 
 ## m. Interactive plot
 
@@ -504,6 +564,28 @@ the values for education expenditure, net migration rate, and population
 should be shown. (Hint: use the aesthetic `text = Country`. 
 In `ggplotly` use the argument `tooltip = c("text", "x", "y", "size")`).
 
+```{r}
+library(plotly)
+p <- ggplot(merged_data, aes(x = net_migr_rate, y = expenditure)) +
+  geom_point(aes(size = population, color = continent,
+                 text = paste("Country: ", country,
+                              "<br>Education Expenditure: ", expenditure,
+                              "<br>Net Migration Rate: ", net_migr_rate,
+                              "<br>Population: ", scales::comma(population)))
+             ,alpha = 0.7) +
+  labs(
+    title = "Education expenditure vs. Net migration rate",
+    x = "Net migration rate",
+    y = "Education expenditure" # 
+  ) +
+   
+  theme(legend.position = "right")
+pltly <- ggplotly(p, tooltip = c("text"))
+pltly
+```
+
+The plot shows an overview of education expenditure vs net migration, as the 
+net migration in *Libanon* is so low (outlier) it distorts the overall picture.
 
 
 ## n. Parallel coordinate plot
