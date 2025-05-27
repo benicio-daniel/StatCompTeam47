@@ -653,13 +653,13 @@ map_data <- merged_data %>%
 sPDF <- joinCountryData2Map(map_data,
                             joinCode = "NAME",
                             nameJoinColumn = "country",
-                            verbose = TRUE)  # prints summary with unmatched countries
+                            verbose = TRUE)
 
 # Plot the world map
 mapCountryData(sPDF,
                nameColumnToPlot = "expenditure",
                mapTitle = "Education Expenditure (% of GDP)",
-               catMethod = "quantiles",     # alternative: "fixedWidth"
+               catMethod = "quantiles",
                colourPalette = "heat",
                missingCountryCol = "lightgrey")
 ```
