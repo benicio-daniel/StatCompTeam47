@@ -26,6 +26,8 @@ library(tidyverse)
 library(ggplot2)
 library(readr)
 library(dplyr)
+library(readxl)
+library(rworldmap)
 
 # Load dataset from the data folder
 data <- read_csv("data/file_out2.csv")
@@ -298,8 +300,6 @@ the x-axis.
   net migration
   rate.
   
-  * Comment on the plot. E.g., what are the regions with the most influx? 
-  What are the regions with the most outflux?
 ```{r median net migration rate per subcontinent}
 library(forcats)
 
@@ -330,6 +330,10 @@ ggplot(median_data, aes(x = median_net_migr, y = subcontinent, color = continent
   ) +
   theme_minimal(base_size = 13)
 ```
+  * Comment on the plot. E.g., what are the regions with the most influx? 
+  What are the regions with the most outflux?
+
+The plot shows that regions such as Australia, New Sealand and Western Europe have the highest median net migration rates, indicating strong influx. In contrast, regions like Micronesia and Polynesia show the lowest medians, suggesting consistent net outflux. These patterns reflect broader regional migration trends and economic attractiveness where most of the subcontinets show trends near zero.
 
 
 ## g. Median youth unemployment rate per subcontinent
@@ -353,9 +357,6 @@ the x-axis.
   such that in the plot the lowest (bottom) subcontinent contains the lowest median
   youth unemployment rate and the upper most region contains the highest median
   youth unemployment rate.
-  
-  * Comment on the plot. E.g., what are the regions with the highest vs lowest youth
-  unemployment rate?
 ```{r}
 # Clean the correct column
 data_filtered$youth_unempl_rate <- as.character(data_filtered$youth_unempl_rate)
@@ -383,6 +384,11 @@ ggplot(median_data, aes(x = median_youth_unempl_rate, y = subcontinent, fill = c
   ) +
   theme_bw(base_size = 13)
 ```
+  * Comment on the plot. E.g., what are the regions with the highest vs lowest youth
+  unemployment rate?
+  
+The plot shows that Northern Africa, Polynesia, and Southern Europe have the highest median youth unemployment rates, indicating considerable challenges in youth labor markets. In contrast, regions such as Eastern Asia and Central Asia show the lowest medians, suggesting relatively better youth employment conditions. These results highlight regional inequalities in youth labor integration across the globe.
+
 
 ## h. Median youth unemployment rate per subcontinent -- with error bars
 
@@ -394,6 +400,7 @@ the variable in each of the subcontinents.
 
 Repeat the plot from Task g. but include also error bars which reflect the 25% and 75%
 quantiles. You can use `geom_errorbar` in **ggplot2**.
+
 ```{r}
 # Clean the correct column
 data_filtered$youth_unempl_rate <- as.character(data_filtered$youth_unempl_rate)
@@ -424,6 +431,7 @@ ggplot(median_data, aes(x = median_youth_unempl_rate, y = subcontinent, fill = c
   theme_bw(base_size = 13)
 ```
 
+The error bars indicate the spread of youth unemployment rates within each subcontinent. Wide bars, such as in Northern Africa, suggest large internal variation, while narrower bars in Eastern Asia or Central Asia reflect more homogeneous situations. This helps identify regions where the median may not fully represent the situation across all countries.
 
 
 ## i. Relationship between education expenditure and net migration rate
@@ -435,9 +443,7 @@ net migration rate.
 
   * Add a regression line for each development status (using `geom_smooth()`).
   
-Comment on the plot. Do you see any relationship between the two variables? Do you see
-any difference among the income levels?
-```{r}
+```{r, message = FALSE, warning = FALSE}
 ggplot(data_filtered, aes(x = expenditure, y = net_migr_rate, color = income_status)) +
   #geom_point(alpha = 0.7) +
   geom_smooth(method = "lm", se = FALSE) +
@@ -450,11 +456,16 @@ ggplot(data_filtered, aes(x = expenditure, y = net_migr_rate, color = income_sta
   ) +
   theme_bw(base_size = 13)
 ```
+Comment on the plot. Do you see any relationship between the two variables? Do you see
+any difference among the income levels?
+
+The plot shows contrasting relationships between education expenditure and net migration rate depending on income level. In upper-middle-income countries, there is a clear positive association – higher education spending correlates with higher net migration rates. In contrast, lower-middle-income countries show a strong negative relationship, suggesting that higher spending may be associated with greater outmigration. High-income and low-income countries exhibit only weak trends. These findings suggest that the effect of education investment on migration varies significantly across economic contexts.
+
 
 ## j. Relationship between youth unemployment and net migration rate
 
-Create a plot as in Task i. but for youth unemployment and net migration rate. Comment briefly.
-```{r}
+Create a plot as in Task i. but for youth unemployment and net migration rate.
+```{r, message = FALSE, warning = FALSE}
 ggplot(data_filtered, aes(x = youth_unempl_rate, y = net_migr_rate, color = income_status)) +
   #geom_point(alpha = 0.7) +
   geom_smooth(method = "lm", se = FALSE) +
@@ -467,6 +478,9 @@ ggplot(data_filtered, aes(x = youth_unempl_rate, y = net_migr_rate, color = inco
   ) +
   theme_bw(base_size = 13)
 ```
+Comment briefly.
+
+The plot shows opposing trends for low- and high-income countries: low-income regions exhibit a positive relationship between youth unemployment and net migration, while high-income countries show a negative one. This suggests that in poorer countries, youth unemployment may drive emigration, whereas in richer countries, high unemployment might reduce immigration. The other income groups show weaker or flat trends.
 
 
 ## k. Merging population data
@@ -482,7 +496,6 @@ this case study using a left join.
 Fetching the population data from above mentioned link and extracting a table containing
 Country Name, Country Code and Population data of 2020
 ```{r}
-library(readxl)
 file_path <- "./data/pop_data.xls"
 pop_data <- read_excel(file.path(file_path))
 pop_data_2020 <- pop_data %>%
@@ -533,7 +546,7 @@ europe_data <- merged_data %>%
   
   * Remove the legend.
   
-```{r}
+```{r, message=FALSE, warning=False}
 ggplot(europe_data, aes(x = net_migr_rate, y = expenditure)) +
   geom_point(aes(size = population), alpha = 0.7) +
   scale_size_continuous(range = c(2, 15)) +
@@ -629,3 +642,54 @@ Some upper and lower middle are under the top spenders of education purposes but
 Create a world map of the education expenditure per country.
 You can use the vignette https://cran.r-project.org/web/packages/rworldmap/vignettes/rworldmap.pdf
 to find how to do this in R. Alternatively, you can use other packages (such as **ggplot2**, **sf** and **rnaturalearthdata**) to create a map.
+
+
+```{r}
+# Prepare data: ensure "country" and "expenditure" columns are present
+map_data <- merged_data %>%
+  select(country, expenditure)
+
+# Join with map using country names
+sPDF <- joinCountryData2Map(map_data,
+                            joinCode = "NAME",
+                            nameJoinColumn = "country",
+                            verbose = TRUE)  # prints summary with unmatched countries
+
+# Plot the world map
+mapCountryData(sPDF,
+               nameColumnToPlot = "expenditure",
+               mapTitle = "Education Expenditure (% of GDP)",
+               catMethod = "quantiles",     # alternative: "fixedWidth"
+               colourPalette = "heat",
+               missingCountryCol = "lightgrey")
+```
+
+The world map highlights substantial differences in education expenditure across countries. High spenders (shown in red) are concentrated in Latin America, parts of Europe, and Canada. Countries with missing data appear in light grey, including some territories in the Middle East and Caribbean. Overall, the map effectively visualizes geographic disparities in investment in education as a share of GDP.
+
+Note: Some countries could not be matched due to naming mismatches (e.g., Czechia, Eswatini, Gaza Strip).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
