@@ -1,4 +1,6 @@
 # ----------------------------------------------
+# Ich habe hier schon mal einen Test eingefügt, obs funktioniert, drück mal oben auf "Run App" :)
+#
 # Load required packages
 # ----------------------------------------------
 library(shiny)
@@ -9,6 +11,7 @@ library(ggplot2)
 # ----------------------------------------------
 source("R/data_prep.R")   # provides prepare_data()
 df <- prepare_data()      # cleaned and merged dataset
+glimpse(df)               # zeigt Daten, einfach löschen 
 
 # ----------------------------------------------
 # Define UI (minimal layout)

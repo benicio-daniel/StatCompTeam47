@@ -69,7 +69,7 @@ cia <- cia %>%
 # --------------------------------------------------
 world_map <- map_data("world") %>%
   mutate(
-    ISO3 = suppressWarnings(   # clear Warining in Output
+    ISO3 = suppressWarnings(   # clears warning in output
       countrycode(region, origin = "country.name", destination = "iso3c")
     )
   )
