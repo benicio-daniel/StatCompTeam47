@@ -34,16 +34,10 @@ cia$income_status <- recode(cia$income_status,
                              "UM" = "Upper middle",
                              "LM" = "Lower middle",
                              "L" = "Low")
+#print(names(cia_raw))
 #glimpse(cia)
 
 # join mit worldmap
-world_map <- map_data("world")
-# nur Länder mit gültigem ISO-Code behalten
-world_map_clean <- world_map %>%
-  mutate(iso3 = countrycode(region, "country.name", "iso3c")) %>%
-  filter(!is.na(iso3))
-world_full <- world_map %>%
-   left_join(cia, by = "iso3")
 
 
 
