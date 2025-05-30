@@ -8,17 +8,17 @@ library(here)
 
 # ----------------------------------------------
 # Our Files
-------------------------------------------------
-#source(here("src", "Case_Study_4", "R", "plot_helpers.R"))
-#source(here("src", "Case_Study_4", "R", "ui_univariate.R")) laden erst, sobald funktionen drin sind
-#source(here("src", "Case_Study_4", "R", "server_univariate.R"))
+# ----------------------------------------------
+source(here("src", "Case_Study_4", "R", "plot_helpers.R"))
+source(here("src", "Case_Study_4", "R", "ui_univariate.R"))
+#source(here("src", "Case_Study_4", "R", "server_univariate.R"))  laden erst, wenn da funktionen drin sind!
 #source(here("src", "Case_Study_4", "R", "ui_multivariate.R"))
 #source(here("src", "Case_Study_4", "R", "server_multivariate.R"))
 
 # ----------------------------------------------
 # Load prepared data from external script
 # ----------------------------------------------
-source("R/data_prep.R")   # provides prepare_data()
+source(here("src", "Case_Study_4", "R", "data_prep.R"))   # provides prepare_data()
 df <- prepare_data()                                      # cleaned and merged dataset
 
 glimpse(df)               # zeigt Daten, einfach löschen 
@@ -27,9 +27,9 @@ glimpse(df)               # zeigt Daten, einfach löschen
 # Define UI
 # ----------------------------------------------
 ui <- fluidPage(
-  titlePanel("Test World Map – Population"),
-  mainPanel(
-    plotOutput("basicMap")
+  titlePanel("World Facts App"),
+  tabsetPanel(
+    univariate_tab()
   )
 )
 
@@ -38,11 +38,7 @@ ui <- fluidPage(
 # ----------------------------------------------
 server <- function(input, output, session) {
   output$basicMap <- renderPlot({
-    ggplot(df, aes(x = long, y = lat, group = group, fill = pop)) +
-      geom_polygon(color = "white", size = 0.1) +
-      scale_fill_viridis_c(option = "C", na.value = "lightgrey") +
-      coord_equal() +
-      theme_void()
+    render_basic_map(df, input$var1)
   })
   
   # Closes App when R Studion is closed
