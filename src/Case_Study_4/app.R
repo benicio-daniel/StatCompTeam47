@@ -1,20 +1,30 @@
 # ----------------------------------------------
-# Ich habe hier schon mal einen Test eingefügt, obs funktioniert, drück mal oben auf "Run App" :)
-#
 # Load required packages
 # ----------------------------------------------
+# install.packages(c("shiny","ggplot2", "here"))
 library(shiny)
 library(ggplot2)
+library(here)
+
+# ----------------------------------------------
+# Our Files
+------------------------------------------------
+#source(here("src", "Case_Study_4", "R", "plot_helpers.R"))
+#source(here("src", "Case_Study_4", "R", "ui_univariate.R")) laden erst, sobald funktionen drin sind
+#source(here("src", "Case_Study_4", "R", "server_univariate.R"))
+#source(here("src", "Case_Study_4", "R", "ui_multivariate.R"))
+#source(here("src", "Case_Study_4", "R", "server_multivariate.R"))
 
 # ----------------------------------------------
 # Load prepared data from external script
 # ----------------------------------------------
 source("R/data_prep.R")   # provides prepare_data()
-df <- prepare_data()      # cleaned and merged dataset
+df <- prepare_data()                                      # cleaned and merged dataset
+
 glimpse(df)               # zeigt Daten, einfach löschen 
 
 # ----------------------------------------------
-# Define UI (minimal layout)
+# Define UI
 # ----------------------------------------------
 ui <- fluidPage(
   titlePanel("Test World Map – Population"),
@@ -34,9 +44,14 @@ server <- function(input, output, session) {
       coord_equal() +
       theme_void()
   })
+  
+  # Closes App when R Studion is closed
+  session$onSessionEnded(function() {
+    stopApp()
+  })
 }
 
 # ----------------------------------------------
-# Run the app
+# Run the app (in extern browser)
 # ----------------------------------------------
-shinyApp(ui, server)
+shiny::runApp(list(ui = ui, server = server), launch.browser = TRUE)
