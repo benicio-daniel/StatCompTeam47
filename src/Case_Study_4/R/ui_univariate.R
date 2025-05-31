@@ -1,16 +1,33 @@
-# ----------------------------------------------
-# Add plot functions
-# ----------------------------------------------
+library(DT)
+library(plotly)
+# Mapping of display names to column names
+var_choices <- c(
+  "Education Expenditure" = "edu_exp",
+  "Youth Unemployment Rate" = "unemp_youth_rate",
+  "Life Expectancy" = "life_exp",
+  "Population Growth Rate" = "pop",
+  "Net Migration Rate" = "net_migr_rate",
+  "Electricity Fossil Fuel" = "electricity_fossil_fuel"
+)
 univariate_tab <- function() {
-  tabPanel("Univariate",
+  tabPanel("Univariate Analysis",
            sidebarLayout(
              sidebarPanel(
-               selectInput("var1", "Variable:", choices = c("pop", "area", "life_exp")),
-               actionButton("show_table", "Tabelle anzeigen")
+               selectInput("var1", "Variable:", choices = var_choices),
+               actionButton("show_table", "View Raw Data"),
+               DTOutput("dynamicTable")
              ),
              mainPanel(
                tabsetPanel(
-                 tabPanel("Map", plotOutput("basicMap"))
+                 tabPanel("Map", plotlyOutput("mapPlot")),
+                 tabPanel("Global Analysis",
+                          plotlyOutput("globalBoxplot"),
+                          plotlyOutput("globalDensity")
+                 ),
+                 tabPanel("Analysis per Continent",
+                          plotlyOutput("continentBoxplot"),
+                          plotlyOutput("continentDensity")
+                 )
                )
              )
            )

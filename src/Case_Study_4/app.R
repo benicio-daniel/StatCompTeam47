@@ -1,27 +1,25 @@
 # ----------------------------------------------
 # Load required packages
 # ----------------------------------------------
-# install.packages(c("shiny","ggplot2", "here"))
 library(shiny)
 library(ggplot2)
 library(here)
+library(DT)
+library(plotly)
+library(viridis)
 
 # ----------------------------------------------
-# Our Files
+# Source project files
 # ----------------------------------------------
 source(here("src", "Case_Study_4", "R", "plot_helpers.R"))
 source(here("src", "Case_Study_4", "R", "ui_univariate.R"))
-#source(here("src", "Case_Study_4", "R", "server_univariate.R"))  laden erst, wenn da funktionen drin sind!
-#source(here("src", "Case_Study_4", "R", "ui_multivariate.R"))
-#source(here("src", "Case_Study_4", "R", "server_multivariate.R"))
+source(here("src", "Case_Study_4", "R", "server_univariate.R"))
+source(here("src", "Case_Study_4", "R", "data_prep.R"))
 
 # ----------------------------------------------
-# Load prepared data from external script
+# Load data
 # ----------------------------------------------
-source(here("src", "Case_Study_4", "R", "data_prep.R"))   # provides prepare_data()
-df <- prepare_data()                                      # cleaned and merged dataset
-
-glimpse(df)               # zeigt Daten, einfach löschen 
+df <- prepare_data()  # cleaned and merged dataset
 
 # ----------------------------------------------
 # Define UI
@@ -30,6 +28,7 @@ ui <- fluidPage(
   titlePanel("World Facts App"),
   tabsetPanel(
     univariate_tab()
+    # multivariate_tab()  # Uncomment when ready
   )
 )
 
@@ -37,17 +36,15 @@ ui <- fluidPage(
 # Define server logic
 # ----------------------------------------------
 server <- function(input, output, session) {
-  output$basicMap <- renderPlot({
-    render_basic_map(df, input$var1)
-  })
+  univariate_server(input, output, session, df)
   
-  # Closes App when R Studion is closed
+  # Closes App when R Studio is closed
   session$onSessionEnded(function() {
     stopApp()
   })
 }
 
 # ----------------------------------------------
-# Run the app (in extern browser)
+# Run the app
 # ----------------------------------------------
-shiny::runApp(list(ui = ui, server = server), launch.browser = TRUE)
+shinyApp(ui = ui, server = server)
