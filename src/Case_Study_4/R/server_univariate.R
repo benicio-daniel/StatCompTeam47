@@ -42,23 +42,19 @@ univariate_server <- function(input, output, session, df) {
     
     ggplotly(p, tooltip = "text")
   })
-  
-  # 3. Global Density/Histogram
+  # 3. Global Density Plot
   output$globalDensity <- renderPlotly({
     label <- names(var_choices)[var_choices == input$var1]
     
-    p <- ggplot(df, aes(
-      x = .data[[input$var1]],
-      text = paste0(label, ": ", round(.data[[input$var1]], 2))
-    )) +
-      geom_histogram(aes(y = ..density..), bins = 30, fill = "skyblue", alpha = 0.6) +
-      geom_density(color = "blue", size = 1, alpha = 0.5) +
-      theme_minimal() +
-      labs(x = label, y = "Density")
+    p <- ggplot(df, aes(x = .data[[input$var1]])) +
+      geom_histogram(aes(y = ..density..), 
+                     bins = 30, fill = "grey", color = "black", alpha = 0.4) +
+      geom_density(fill = "blue", alpha = 0.4) +
+      labs(x = label, y = "Density") +
+      theme_minimal()
     
-    ggplotly(p, tooltip = "text")
+    ggplotly(p, tooltip = c("x", "y"))
   })
-  
   # 4. Continent Boxplot
   output$continentBoxplot <- renderPlotly({
     label <- names(var_choices)[var_choices == input$var1]

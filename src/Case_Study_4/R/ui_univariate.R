@@ -20,13 +20,19 @@ univariate_tab <- function() {
              mainPanel(
                tabsetPanel(
                  tabPanel("Map", plotlyOutput("mapPlot")),
+                 
                  tabPanel("Global Analysis",
-                          plotlyOutput("globalBoxplot"),
-                          plotlyOutput("globalDensity")
+                          fluidRow(
+                            column(6, plotlyOutput("globalBoxplot")),
+                            column(6, plotlyOutput("globalDensity"))
+                          )
                  ),
+                 
                  tabPanel("Analysis per Continent",
-                          plotlyOutput("continentBoxplot"),
-                          plotlyOutput("continentDensity")
+                          fluidRow(
+                            column(6, plotlyOutput("continentBoxplot")),
+                            column(6, plotlyOutput("continentDensity"))
+                          )
                  )
                )
              )
