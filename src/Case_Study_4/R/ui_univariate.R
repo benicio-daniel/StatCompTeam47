@@ -1,5 +1,6 @@
 library(DT)
 library(plotly)
+
 # Mapping of display names to column names
 var_choices <- c(
   "Education Expenditure" = "edu_exp",
@@ -9,11 +10,13 @@ var_choices <- c(
   "Net Migration Rate" = "net_migr_rate",
   "Electricity Fossil Fuel" = "electricity_fossil_fuel"
 )
+
 univariate_tab <- function() {
   tabPanel("Univariate Analysis",
            sidebarLayout(
              sidebarPanel(
                selectInput("var1", "Variable:", choices = var_choices),
+               selectInput("num_entries", "Number of entries to show:", choices = 5:15, selected = 15),
                actionButton("show_table", "View Raw Data"),
                DTOutput("dynamicTable")
              ),

@@ -11,7 +11,6 @@ univariate_server <- function(input, output, session, df) {
     "Net Migration Rate" = "net_migr_rate",
     "Electricity Fossil Fuel" = "electricity_fossil_fuel"
   )
-  # 1. Map Plot
   output$mapPlot <- renderPlotly({
     label <- names(var_choices)[var_choices == input$var1]
     
@@ -23,7 +22,17 @@ univariate_server <- function(input, output, session, df) {
     )) +
       geom_polygon(color = "white") +
       scale_fill_viridis_c(option = "plasma") +
-      theme_void()
+      coord_fixed() +
+      labs(x = "Longitude", y = "Latitude", fill = input$var1) +
+      theme_minimal(base_size = 12) +
+      theme(
+        axis.title.y = element_text(margin = margin(r = 5)),  # move y label closer
+        plot.margin = margin(10, 10, 10, 10),  # top, right, bottom, left
+        legend.position = "right",
+        legend.justification = c(0.5, 0.5),
+        legend.margin = margin(l = -10, r = 0),
+        legend.box.margin = margin(l = -20)
+      )
     
     ggplotly(p, tooltip = "text")
   })
@@ -77,7 +86,7 @@ univariate_server <- function(input, output, session, df) {
     label <- names(var_choices)[var_choices == input$var1]
     
     p <- ggplot(df, aes(x = .data[[input$var1]], fill = continent, color = continent)) +
-      geom_density(alpha = 0.4, size = 1) +  # alpha for fill, size=1 for outline
+      geom_density(alpha = 0.4, size = 1, bw = 0.5) +  # alpha for fill, size=1 for outline
       theme_minimal() +
       labs(x = label, y = "Density")
     
@@ -85,18 +94,27 @@ univariate_server <- function(input, output, session, df) {
   })
   
   # Table
+  # UI element (add this somewhere in your sidebarPanel or UI layout)
+  
+  # Table rendering logic
   observeEvent(input$show_table, {
     output$dynamicTable <- renderDT({
+      req(input$var1)  # Ensure var1 is selected
+      req(input$num_entries)  # Ensure num_entries exists
+      
       df_subset <- df[, c("country", "continent", input$var1), drop = FALSE]
-      df_subset <- head(df_subset, 15)
+      df_subset <- df_subset[!duplicated(df_subset$country), ]
+      
+      # Use input$num_entries only to set page length, not to trim rows
+      n_entries <- if (!is.null(input$num_entries)) as.numeric(input$num_entries) else 10
       
       datatable(
         df_subset,
         options = list(
-          pageLength = 15,
+          pageLength = n_entries,
           lengthChange = FALSE,
-          searching = FALSE,
-          paging = FALSE
+          searching = TRUE,
+          paging = TRUE
         )
       )
     })

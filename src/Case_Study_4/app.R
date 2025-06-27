@@ -27,13 +27,18 @@ df <- prepare_data()  # cleaned and merged dataset
 # Define UI
 # ----------------------------------------------
 ui <- fluidPage(
-  titlePanel("World Facts App"),
+  titlePanel("CIA World Factbook 2020"),
+  
+  # Subtitle
+  tags$h5(
+    tags$em("Welcome to my shiny app, which allows you to visualize variables from the CIA 2020 factbook on the world map, generate descriptive statistics and statistical graphics.")
+  ),
+  
   tabsetPanel(
     univariate_tab(),
     multivariate_tab()
   )
 )
-
 # ----------------------------------------------
 # Define server logic
 # ----------------------------------------------
