@@ -11,12 +11,12 @@ library(viridis)
 # ----------------------------------------------
 # Source project files
 # ----------------------------------------------
-source(here("src", "Case_Study_4", "R", "plot_helpers.R"))
-source(here("src", "Case_Study_4", "R", "ui_univariate.R"))
-source(here("src", "Case_Study_4", "R", "server_univariate.R"))
-source(here("src", "Case_Study_4", "R", "ui_multivariate.R"))
-source(here("src", "Case_Study_4", "R", "server_multivariate.R"))
-source(here("src", "Case_Study_4", "R", "data_prep.R"))
+source(here("R", "plot_helpers.R"))
+source(here("R", "ui_univariate.R"))
+source(here("R", "server_univariate.R"))
+source(here("R", "ui_multivariate.R"))
+source(here("R", "server_multivariate.R"))
+source(here("R", "data_prep.R"))
 
 # ----------------------------------------------
 # Load data

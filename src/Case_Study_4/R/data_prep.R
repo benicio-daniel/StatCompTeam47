@@ -11,7 +11,7 @@ library(here)
 # --------------------------------------------------
 # Load JSON Data
 # --------------------------------------------------
-json_path <- here("src", "Case_Study_4", "data", "data_cia2.json")
+json_path <- here("data", "data_cia2.json")
 json_text <- readLines(json_path, warn = FALSE)
 cia_raw <- fromJSON(paste(json_text, collapse = ""), flatten = TRUE)
 
